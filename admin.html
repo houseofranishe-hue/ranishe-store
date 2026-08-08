@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders — House of Ranishè Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1C1416; --ivory:#F7F3EC; --paper:#FBF8F3; --rani:#93124A; --muted:#8A7B7E; --line:rgba(28,20,22,0.1); }
+  body{ margin:0; background:var(--ivory); color:var(--ink); font-family:'Jost',sans-serif; font-weight:300; }
+  .wrap{ max-width:900px; margin:0 auto; padding:40px 24px; }
+  h1{ font-size:16px; letter-spacing:0.12em; text-transform:uppercase; font-weight:500; }
+  .login{ margin-top:24px; display:flex; gap:10px; }
+  input{ flex:1; padding:11px 12px; border:1px solid var(--line); background:var(--paper); font-family:'Jost'; font-size:13px; }
+  button{ padding:11px 20px; background:var(--ink); color:var(--ivory); border:none; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; font-family:'Jost'; }
+  .order{ border:1px solid var(--line); background:var(--paper); padding:18px 20px; margin-top:16px; }
+  .order-head{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:13px; }
+  .order-head .oid{ font-weight:500; letter-spacing:0.06em; }
+  .order-head .status{ font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--rani); }
+  .meta{ font-size:12.5px; color:var(--muted); margin-top:8px; line-height:1.6; }
+  table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:12.5px; }
+  td{ padding:5px 0; border-bottom:1px solid var(--line); }
+  td:last-child{ text-align:right; }
+  .total{ text-align:right; font-weight:500; margin-top:8px; font-size:13px; }
+  select{ font-family:'Jost'; font-size:11px; padding:6px 8px; border:1px solid var(--line); background:var(--ivory); margin-top:10px; }
+  .err{ color:var(--rani); font-size:12.5px; margin-top:12px; }
+  .empty{ color:var(--muted); font-size:13px; margin-top:24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>House of Ranishè — Orders</h1>
+
+  <div class="login" id="loginRow">
+    <input id="token" type="password" placeholder="Admin token">
+    <button id="loadBtn">View Orders</button>
+  </div>
+  <div class="err" id="err"></div>
+  <div id="orders"></div>
+</div>
+
+<script>
+let TOKEN='';
+document.getElementById('loadBtn').addEventListener('click', load);
+document.getElementById('token').addEventListener('keydown', e=>{ if(e.key==='Enter') load(); });
+
+async function load(){
+  TOKEN=document.getElementById('token').value.trim();
+  const err=document.getElementById('err'); err.textContent='';
+  try{
+    const res=await fetch('/api/orders',{headers:{'X-Admin-Token':TOKEN}});
+    if(res.status===401){ err.textContent='Wrong token.'; return; }
+    const data=await res.json();
+    renderOrders(data);
+  }catch(e){ err.textContent='Could not load orders.'; }
+}
+
+function renderOrders(orders){
+  const el=document.getElementById('orders');
+  if(orders.length===0){ el.innerHTML='<div class="empty">No orders yet.</div>'; return; }
+  el.innerHTML=orders.map(o=>`
+    <div class="order">
+      <div class="order-head">
+        <span class="oid">${o.id}</span>
+        <span class="status">${o.status}</span>
+      </div>
+      <div class="meta">
+        ${new Date(o.created_at).toLocaleString('en-IN')}<br>
+        <strong>${o.customer_name}</strong> · ${o.phone}<br>
+        ${o.address}
+      </div>
+      <table>${o.items.map(it=>`<tr><td>${it.name} × ${it.qty}</td><td>₹${it.unit_price*it.qty}</td></tr>`).join('')}</table>
+      <div class="total">Total ₹${o.total}</div>
+      <select data-id="${o.id}">
+        ${['new','confirmed','shipped','delivered','cancelled'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>`).join('');
+  el.querySelectorAll('select').forEach(s=>s.addEventListener('change', async ()=>{
+    await fetch(`/api/orders/${s.dataset.id}/status?status=${s.value}`,{method:'POST',headers:{'X-Admin-Token':TOKEN}});
+    load();
+  }));
+}
+</script>
+</body>
+</html>

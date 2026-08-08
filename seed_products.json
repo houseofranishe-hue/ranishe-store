@@ -1,0 +1,1604 @@
+[
+ {
+  "sku": "SKU-0",
+  "name": "A necklace charm",
+  "category": "Charms",
+  "price": 80,
+  "sale_price": 52,
+  "stock": 15,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH001",
+  "name": "The Luma Hoops",
+  "category": "Hoops",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH002",
+  "name": "Nova Hug",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 499,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH003",
+  "name": "Elora Hoops",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 499,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH004",
+  "name": "Lia Gold Hoop",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH005",
+  "name": "Raya earrings",
+  "category": "Hoops",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH006",
+  "name": "Celestial Bloom Gold Hoops",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS003",
+  "name": "The Bloom Mini Studs",
+  "category": "Studs",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH007",
+  "name": "The Triangle Drop",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH008",
+  "name": "Mini Oval Hoops",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC001",
+  "name": "Sunray",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC002",
+  "name": "Butterfly Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC003",
+  "name": "Starlit line necklace",
+  "category": "Chains",
+  "price": 499,
+  "sale_price": 399,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC004",
+  "name": "Golden Butterfly necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH009",
+  "name": "Minimalist Gold Open Hoops",
+  "category": "Hoops",
+  "price": 599,
+  "sale_price": 599,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS001",
+  "name": "Tria Bloom",
+  "category": "Studs",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH010",
+  "name": "Mira",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH011",
+  "name": "Two in one Gold and Silver Hoops",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC005",
+  "name": "Melted Muse",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC006",
+  "name": "Floral Charm Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC007",
+  "name": "Soft Heart",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC008",
+  "name": "Moonlight Necklace",
+  "category": "Chains",
+  "price": 499,
+  "sale_price": 399,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC009",
+  "name": "Trilight",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC010",
+  "name": "Petal Wish",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC011",
+  "name": "Evil Eye Necklace",
+  "category": "Chains",
+  "price": 499,
+  "sale_price": 449,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC012",
+  "name": "Girl-Twirl Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC013",
+  "name": "Lumine",
+  "category": "Chains",
+  "price": 499,
+  "sale_price": 499,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC014",
+  "name": "Noor",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC015",
+  "name": "Aura Heart",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC016",
+  "name": "Bloomfall Chain",
+  "category": "Chains",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC017",
+  "name": "Sweetheart Stacked Chain",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC018",
+  "name": "Celestia",
+  "category": "Chains",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC019",
+  "name": "Curve of You",
+  "category": "Chains",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC020",
+  "name": "Daylight Dusk",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC021",
+  "name": "Ocean Whispers Chain",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC022",
+  "name": "Hoop Pendant Chain",
+  "category": "Chains",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC023",
+  "name": "Bow Pendant Charm",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS004",
+  "name": "Loop Luxe Studs",
+  "category": "Studs",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC024",
+  "name": "Minted Hearts",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH012",
+  "name": "The Quilt Hoop",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 499,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH013",
+  "name": "Basic Open Hoops",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 199,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS001-2",
+  "name": "Blue Bloom Charm",
+  "category": "Charms",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS005",
+  "name": "The Oasis Studs",
+  "category": "Studs",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH014",
+  "name": "Basic Round Hoops",
+  "category": "Hoops",
+  "price": 199,
+  "sale_price": 129,
+  "stock": 6,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH015",
+  "name": "Stellar Charm Hoops",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 402,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH016",
+  "name": "Golden Muse Hoops",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 402,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH017",
+  "name": "Tiny Heartfall Hoops",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 314,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH018",
+  "name": "Nysa",
+  "category": "Hoops",
+  "price": 399,
+  "sale_price": 276,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH019",
+  "name": "Duo Drop",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 314,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH020",
+  "name": "Blue Hour Hoops",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG001",
+  "name": "The Purple Muse",
+  "category": "Huggies",
+  "price": 499,
+  "sale_price": 499,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS002",
+  "name": "Sapphire Studs",
+  "category": "Studs",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS004-2",
+  "name": "The Lys Drop",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 499,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC025",
+  "name": "Minted Light Stacked Chain",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC026",
+  "name": "Northlight",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC027",
+  "name": "Aurelia",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC033",
+  "name": "Written in Stars",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH021",
+  "name": "The Classic Dome",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH022",
+  "name": "Blush Drop",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 279,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH023",
+  "name": "Blue Boom Hoops",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH024",
+  "name": "Pearl Drop Hoops",
+  "category": "Hoops",
+  "price": 429,
+  "sale_price": 429,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH025",
+  "name": "Iraaya",
+  "category": "Hoops",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH026",
+  "name": "Sitara Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC028",
+  "name": "Little Hearts",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC029",
+  "name": "Curve of Love",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC030",
+  "name": "Moon Shine",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC001",
+  "name": "Square Diamond",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC002",
+  "name": "Mini Diamond",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC003",
+  "name": "Celestia",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC004",
+  "name": "Aurora",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC005",
+  "name": "Classic",
+  "category": "Bracelets",
+  "price": 199,
+  "sale_price": 179,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC006",
+  "name": "Honey Bee",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC007",
+  "name": "Amour",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC008",
+  "name": "Nyra",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC009",
+  "name": "Ziva",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 349,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH027",
+  "name": "Mini Gold Bow Hoops",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 449,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH028",
+  "name": "Eternal Heart Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH029",
+  "name": "Charm Bow Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH030",
+  "name": "Molten Heart Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 194,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC010",
+  "name": "Glowline Trio",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH031",
+  "name": "Eira Drop Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH032",
+  "name": "Sunlit Drop Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH033",
+  "name": "Rachel Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH034",
+  "name": "Amara Drop Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH035",
+  "name": "Golden Twirl Hoops",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 402,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC011",
+  "name": "Loope Cuff",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 201,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC012",
+  "name": "Solea",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC013",
+  "name": "Meher",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC014",
+  "name": "Daisy",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC015",
+  "name": "Linear Luxe",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC016",
+  "name": "Auraline",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC017",
+  "name": "Starlight",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC018",
+  "name": "Valentina",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC019",
+  "name": "Jasmine",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC020",
+  "name": "Moana",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC021",
+  "name": "Everyday Essential",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS006",
+  "name": "Luna Studs",
+  "category": "Studs",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH036",
+  "name": "Daily Love Hoops",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 194,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH037",
+  "name": "The classic drop",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH038",
+  "name": "Golden Bloom Hoops",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC022",
+  "name": "Zara",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC023",
+  "name": "Juliet",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 349,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC031",
+  "name": "Trinity Charm Necklace",
+  "category": "Chains",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC032",
+  "name": "Mermaid Treasure Necklace",
+  "category": "Chains",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS007",
+  "name": "Duo Melt Studs",
+  "category": "Studs",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC024",
+  "name": "Wavy - Bracelet and Ring Set",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 349,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC025",
+  "name": "Emma - Bracelet and Ring Set",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 349,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC026",
+  "name": "Spiral Adjustable Cuff",
+  "category": "Bracelets",
+  "price": 249,
+  "sale_price": 199,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC027",
+  "name": "Dual Tone Flex Bangles",
+  "category": "Bracelets",
+  "price": 249,
+  "sale_price": 249,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC028",
+  "name": "Golden Loop Cuff",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS008",
+  "name": "Aurea Drops",
+  "category": "Studs",
+  "price": 299,
+  "sale_price": 194,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH039",
+  "name": "Heart Glow Huggies",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH040",
+  "name": "Twisted Emerald Hoops",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH041",
+  "name": "Sparkle Heart Hoops",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH042",
+  "name": "Elara Gold Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH043",
+  "name": "Eva Minimalist Hoops",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH044",
+  "name": "Sparkly Hoops",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 194,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH045",
+  "name": "Prism Oval Hoops",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 279,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH046",
+  "name": "Spring Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC029",
+  "name": "Hollow Hearts Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC030",
+  "name": "Golden Grid Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC031",
+  "name": "Infinity Braid Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC032",
+  "name": "Golden Wave Cuff",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 314,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC033",
+  "name": "Athena Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC034",
+  "name": "Vintage Buckle Bracelet",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 314,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC035",
+  "name": "Dual Tone Flex Band",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 230,
+  "stock": 7,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC036",
+  "name": "Golden Flex Band",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 314,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC037",
+  "name": "Greek Key Diamond Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC038",
+  "name": "Infinity Luxe Bracelet",
+  "category": "Bracelets",
+  "price": 449,
+  "sale_price": 299,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC039",
+  "name": "Sleek Sparkle Bracelet",
+  "category": "Bracelets",
+  "price": 449,
+  "sale_price": 368,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC040",
+  "name": "Prestige Crystal Bracelet",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC041",
+  "name": "Vogue Chain Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC042",
+  "name": "Radiance Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC043",
+  "name": "Grace Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC044",
+  "name": "Roma Link Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC045",
+  "name": "Multi-shape Diamond Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC046",
+  "name": "Golden Ring Link",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC047",
+  "name": "Linear Shine Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 288,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC048",
+  "name": "Emerald Crown Bracelet",
+  "category": "Bracelets",
+  "price": 449,
+  "sale_price": 299,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC049",
+  "name": "Seashell Bracelet",
+  "category": "Bracelets",
+  "price": 499,
+  "sale_price": 414,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC050",
+  "name": "Juliet -2",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 264,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC051",
+  "name": "Golden Leaf",
+  "category": "Bracelets",
+  "price": 384,
+  "sale_price": 384,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC052",
+  "name": "Interlock open cuff",
+  "category": "Bracelets",
+  "price": 299,
+  "sale_price": 194,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC053",
+  "name": "The Core Three-Small Size",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 299,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC054",
+  "name": "The Core Three-Regular Size",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 299,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC055",
+  "name": "Royal Glow Chain Bracelet",
+  "category": "Bracelets",
+  "price": 499,
+  "sale_price": 324,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC056",
+  "name": "Stellar Duo Chain Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC057",
+  "name": "Classic Tennis Bracelet - Gold",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 359,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC058",
+  "name": "Classic Tennis Bracelet - Rose Gold",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 264,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC059",
+  "name": "Rectangular Tennis Bracelet - Gold",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 276,
+  "stock": 6,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC060",
+  "name": "Rectangular Tennis Bracelet - Rose Gold",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 5,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC061",
+  "name": "Silver Classic Tennis Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 5,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC062",
+  "name": "Silver Rectangular Tennis Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 5,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC063",
+  "name": "Multi-color Tennis Bracelet (Thin)",
+  "category": "Bracelets",
+  "price": 349,
+  "sale_price": 230,
+  "stock": 5,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC064",
+  "name": "Multi-color Tennis Bracelet (Thick)",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 5,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS009",
+  "name": "Heart Pop Studs",
+  "category": "Studs",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH047",
+  "name": "Scarlett Drop Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG002",
+  "name": "Olivia Huggies",
+  "category": "Huggies",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG003",
+  "name": "Eva Earrings",
+  "category": "Huggies",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG004",
+  "name": "Solitaire Huggies",
+  "category": "Huggies",
+  "price": 299,
+  "sale_price": 269,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS010",
+  "name": "Crystal Drop Earrings",
+  "category": "Studs",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 5,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH048",
+  "name": "Amilie Earrings",
+  "category": "Hoops",
+  "price": 499,
+  "sale_price": 399,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH049",
+  "name": "Rosalin Earrings",
+  "category": "Hoops",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 3,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG005",
+  "name": "Diamond Crown Huggies",
+  "category": "Huggies",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG006",
+  "name": "Prima Huggies",
+  "category": "Huggies",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG007",
+  "name": "Royal Blue Huggies",
+  "category": "Huggies",
+  "price": 299,
+  "sale_price": 239,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAH050",
+  "name": "Stacked Shimmer Hoops",
+  "category": "Hoops",
+  "price": 349,
+  "sale_price": 227,
+  "stock": 4,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG008",
+  "name": "Alice Diamond Huggies",
+  "category": "Huggies",
+  "price": 249,
+  "sale_price": 224,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAG009",
+  "name": "Purple Muse Earrings",
+  "category": "Huggies",
+  "price": 249,
+  "sale_price": 162,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAS011",
+  "name": "Grace Drop Earrings",
+  "category": "Studs",
+  "price": 449,
+  "sale_price": 299,
+  "stock": 1,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC065",
+  "name": "Diamond Hearts Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 399,
+  "stock": 0,
+  "image_url": ""
+ },
+ {
+  "sku": "BRC066",
+  "name": "Mini Diamond Bracelet",
+  "category": "Bracelets",
+  "price": 399,
+  "sale_price": 319,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC034",
+  "name": "Solene Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC035",
+  "name": "Petal Diamond Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC036",
+  "name": "Amour Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC037",
+  "name": "Dainty Heart Charm Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC038",
+  "name": "Elara Y Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ },
+ {
+  "sku": "RAC039",
+  "name": "Amara Y Necklace",
+  "category": "Chains",
+  "price": 399,
+  "sale_price": 259,
+  "stock": 2,
+  "image_url": ""
+ }
+]
