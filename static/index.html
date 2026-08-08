@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House of Ranishè — Everyday Anti-Tarnish Gold Jewellery</title>
+<meta name="description" content="Anti-tarnish, hypoallergenic, 18K gold-plated stainless steel jewellery from Mumbai.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C1416; --ivory:#F7F3EC; --paper:#FBF8F3;
+    --rani:#93124A; --rani-tint:#F3DCE4; --gold:#B8862E; --gold-bright:#DDB765;
+    --text:#2C2224; --muted:#8A7B7E; --line: rgba(28,20,22,0.08);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{ margin:0; background:var(--ivory); color:var(--text); font-family:'Jost', sans-serif; font-weight:300; }
+  h1,h2{ font-family:'Cormorant Garamond', serif; font-weight:400; margin:0; }
+  a{color:inherit; text-decoration:none;}
+  img{display:block; max-width:100%;}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 40px;}
+  @media (max-width:560px){ .wrap{padding:0 18px;} }
+  button{font-family:inherit; cursor:pointer;}
+  :focus-visible{outline:1px solid var(--rani); outline-offset:2px;}
+
+  .announce{ text-align:center; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; padding:11px 16px; color:var(--muted); border-bottom:1px solid var(--line); }
+
+  header{ position:sticky; top:0; z-index:40; background:rgba(247,243,236,0.95); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:80px; }
+  .brand{ font-weight:500; font-size:15px; letter-spacing:0.12em; text-transform:uppercase; }
+  .navlinks{ display:flex; gap:34px; list-style:none; margin:0; padding:0; }
+  .navlinks a{ font-size:11.5px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500; }
+  @media (max-width:800px){ .navlinks{display:none;} }
+  .cart-toggle{
+    background:none; border:1px solid var(--ink); padding:9px 18px;
+    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500;
+  }
+
+  .hero{ padding:70px 0 62px; text-align:center; }
+  .hero .eyebrow{ font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--rani); margin-bottom:18px; font-weight:500; }
+  .hero h1{ font-size:clamp(32px,5vw,56px); text-transform:uppercase; line-height:1.12; }
+  .hero h1 em{ font-style:italic; color:var(--rani); }
+  .hero p{ max-width:520px; margin:20px auto 0; font-size:14.5px; line-height:1.7; color:var(--muted); }
+
+  .promise{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .promise .wrap{ display:grid; grid-template-columns:repeat(3,1fr); }
+  @media (max-width:760px){ .promise .wrap{grid-template-columns:1fr;} }
+  .promise-item{ padding:28px 24px; text-align:center; }
+  .promise-item + .promise-item{ border-left:1px solid var(--line); }
+  @media (max-width:760px){ .promise-item + .promise-item{ border-left:none; border-top:1px solid var(--line);} }
+  .promise-item h3{ font-family:'Jost'; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; font-weight:500; margin:0 0 7px; }
+  .promise-item p{ font-size:12.5px; color:var(--muted); line-height:1.6; margin:0; }
+
+  .section{ padding:64px 0; }
+  .section-head{ text-align:center; margin-bottom:30px; }
+  .section-head .eyebrow{ font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .section-head h2{ font-size:clamp(24px,3.2vw,38px); text-transform:uppercase; }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:34px; flex-wrap:wrap; gap:12px; }
+  .toolbar-links{ display:flex; gap:22px; flex-wrap:wrap; }
+  .toolbar-links button{ background:none; border:none; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); padding:0 0 3px; border-bottom:1px solid transparent; }
+  .toolbar-links button.active{ color:var(--ink); border-color:var(--rani); }
+  .sort-select{ font-family:'Jost'; font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; border:none; background:transparent; color:var(--muted); }
+
+  .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:42px 26px; }
+  @media (max-width:980px){ .grid{grid-template-columns:repeat(2,1fr); gap:32px 18px;} }
+  @media (max-width:560px){ .grid{grid-template-columns:1fr;} }
+
+  .card{ display:flex; flex-direction:column; }
+  .media-box{ height:210px; display:flex; align-items:center; justify-content:center; background:var(--paper); margin-bottom:14px; position:relative; overflow:hidden; }
+  .media-box img{ width:100%; height:100%; object-fit:cover; }
+  .media-box .tag{ position:absolute; bottom:9px; left:9px; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+  .card.is-soldout .media-box{ opacity:0.35; }
+  .card h4{ font-size:12.5px; font-weight:400; letter-spacing:0.06em; margin:0 0 6px; text-transform:uppercase; min-height:32px; }
+  .price-line{ font-size:12.5px; display:flex; gap:8px; align-items:baseline; }
+  .price-line .was{ text-decoration:line-through; color:var(--muted); font-size:11.5px; }
+  .save-note{ font-size:10.5px; color:var(--rani); margin-top:3px; }
+  .soldout-note{ font-size:10.5px; color:var(--muted); text-transform:uppercase; margin-top:3px; }
+  .add-btn{
+    margin-top:11px; border:1px solid var(--ink); background:none; padding:10px 0;
+    font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500;
+    transition:background .2s, color .2s;
+  }
+  .add-btn:hover{ background:var(--ink); color:var(--ivory); }
+  .add-btn:disabled{ border-color:var(--line); color:var(--muted); cursor:not-allowed; }
+
+  /* CART DRAWER */
+  .drawer-backdrop{ position:fixed; inset:0; background:rgba(28,20,22,0.4); z-index:60; display:none; }
+  .drawer{ position:fixed; top:0; right:-420px; width:min(420px,100vw); height:100vh; background:var(--ivory); z-index:70; transition:right .3s ease; display:flex; flex-direction:column; border-left:1px solid var(--line); }
+  .drawer.open{ right:0; }
+  .drawer-backdrop.open{ display:block; }
+  .drawer-head{ display:flex; justify-content:space-between; align-items:center; padding:22px 24px; border-bottom:1px solid var(--line); }
+  .drawer-head h2{ font-family:'Jost'; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; font-weight:500; }
+  .drawer-close{ background:none; border:none; font-size:22px; line-height:1; color:var(--muted); }
+  .drawer-body{ flex:1; overflow-y:auto; padding:18px 24px; }
+  .cart-line{ display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+  .cart-line .nm{ text-transform:uppercase; letter-spacing:0.04em; }
+  .qty-row{ display:flex; align-items:center; gap:10px; margin-top:6px; }
+  .qty-row button{ width:24px; height:24px; border:1px solid var(--line); background:none; font-size:14px; }
+  .rm-btn{ background:none; border:none; font-size:10.5px; color:var(--muted); text-decoration:underline; padding:0; margin-top:6px; }
+  .drawer-foot{ border-top:1px solid var(--line); padding:20px 24px; }
+  .total-row{ display:flex; justify-content:space-between; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:14px; }
+  .checkout-btn{ width:100%; background:var(--ink); color:var(--ivory); border:none; padding:14px 0; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; font-weight:500; }
+  .checkout-btn:disabled{ background:var(--muted); }
+
+  /* CHECKOUT FORM */
+  .form-field{ margin-bottom:14px; }
+  .form-field label{ display:block; font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .form-field input, .form-field textarea{
+    width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--paper);
+    font-family:'Jost'; font-size:13px; color:var(--text);
+  }
+  .form-field textarea{ min-height:74px; resize:vertical; }
+  .err{ color:var(--rani); font-size:11.5px; margin-top:8px; min-height:16px; }
+
+  /* CONFIRMATION */
+  .confirm-box{ text-align:center; padding:26px 8px; }
+  .confirm-box .oid{ font-size:18px; letter-spacing:0.1em; margin:10px 0 4px; font-weight:500; }
+  .confirm-box p{ font-size:12.5px; color:var(--muted); line-height:1.7; }
+  .pay-btn{ display:block; margin:14px 0 0; background:var(--rani); color:#fff; text-align:center; padding:13px 0; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; }
+  .pay-btn.alt{ background:none; border:1px solid var(--ink); color:var(--ink); }
+
+  footer{ border-top:1px solid var(--line); padding:50px 0 30px; text-align:center; }
+  footer p{ font-size:12px; color:var(--muted); line-height:1.8; max-width:560px; margin:0 auto; }
+  .foot-bottom{ margin-top:26px; font-size:10.5px; color:var(--muted); letter-spacing:0.04em; }
+</style>
+</head>
+<body>
+
+<div class="announce">Hypoallergenic &amp; Waterproof, Every Piece · Free Shipping Over ₹499</div>
+
+<header>
+  <nav class="wrap">
+    <a href="#top" class="brand">House of Ranishè</a>
+    <ul class="navlinks">
+      <li><a href="#shop">Shop</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <button class="cart-toggle" id="cartToggle">Bag (<span id="cartCount">0</span>)</button>
+  </nav>
+</header>
+
+<section class="hero wrap" id="top">
+  <div class="eyebrow">Mumbai · Est. July 2025</div>
+  <h1>Everyday Gold,<br><em>Minus the Upkeep</em></h1>
+  <p>18K gold-plated, hypoallergenic stainless steel — waterproof, skin-safe, and built to hold its shine through daily wear.</p>
+</section>
+
+<div class="promise">
+  <div class="wrap">
+    <div class="promise-item"><h3>Anti-Tarnish</h3><p>A bonded 18K gold finish designed to stay shiny for years, not months.</p></div>
+    <div class="promise-item"><h3>Waterproof</h3><p>Shower, swim, and sweat in it — no need to ever take it off.</p></div>
+    <div class="promise-item"><h3>Skin-Safe</h3><p>Hypoallergenic and nickel-free, made for sensitive skin.</p></div>
+  </div>
+</div>
+
+<section class="section wrap" id="shop">
+  <div class="section-head">
+    <div class="eyebrow">The Full Edit</div>
+    <h2>Shop All</h2>
+  </div>
+  <div class="toolbar">
+    <div class="toolbar-links" id="toolbarLinks"></div>
+    <select class="sort-select" id="sortSelect" aria-label="Sort">
+      <option value="featured">Sort: Featured</option>
+      <option value="price-asc">Price, Low to High</option>
+      <option value="price-desc">Price, High to Low</option>
+      <option value="discount-desc">Biggest Saving</option>
+    </select>
+  </div>
+  <div class="grid" id="productGrid"><div style="color:var(--muted); font-size:13px;">Loading products…</div></div>
+</section>
+
+<section class="section wrap" id="faq" style="padding-top:0;">
+  <div class="section-head"><div class="eyebrow">Good to Know</div><h2>Frequently Asked</h2></div>
+  <div style="max-width:700px; margin:0 auto; font-size:13.5px; color:var(--muted); line-height:1.8; text-align:center;">
+    Every piece is waterproof, anti-tarnish, and safe for sensitive skin. We ship pan-India from Mumbai.
+    Questions? Reach us on WhatsApp after placing an order — your order number is all we need.
+  </div>
+</section>
+
+<footer>
+  <p>House of Ranishè — a Mumbai-based jewellery brand offering durable, anti-tarnish, 18K gold-plated stainless steel jewellery. Est. July 2025.</p>
+  <div class="foot-bottom">© 2026 House of Ranishè · Anti-Tarnish · Hypoallergenic · Made for Everyday</div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="drawer" id="drawer" aria-label="Shopping bag">
+  <div class="drawer-head">
+    <h2 id="drawerTitle">Your Bag</h2>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+
+<script>
+/* ================= CONFIG — EDIT THESE ================= */
+const WHATSAPP_NUMBER = '919167629547';   // your WhatsApp with country code, no +
+const UPI_ID = 'anishmathew131@okicici';            // your UPI ID for payment collection
+const STORE_NAME = 'House of Ranishe';
+/* ======================================================= */
+
+let PRODUCTS = [];
+let CART = {};   // sku -> qty
+let VIEW = 'cart'; // cart | checkout | confirm
+let LAST_ORDER = null;
+
+const state = { cat:'All', sort:'featured' };
+
+async function loadProducts(){
+  try{
+    const res = await fetch('/api/products');
+    PRODUCTS = await res.json();
+  }catch(e){
+    document.getElementById('productGrid').innerHTML = '<div style="color:var(--muted);">Could not load products. Refresh to try again.</div>';
+    return;
+  }
+  buildToolbar(); render();
+}
+
+const ICONS = {
+  Hoops: g=>`<circle cx="50" cy="50" r="26" fill="none" stroke="url(#${g})" stroke-width="4"/>`,
+  Studs: g=>`<circle cx="50" cy="42" r="6" fill="url(#${g})"/><line x1="50" y1="49" x2="50" y2="66" stroke="url(#${g})" stroke-width="2.5"/>`,
+  Bracelets: g=>`<ellipse cx="50" cy="50" rx="30" ry="15" fill="none" stroke="url(#${g})" stroke-width="4"/>`,
+  Chains: g=>`<path d="M24 24 Q50 66 76 24" fill="none" stroke="url(#${g})" stroke-width="2.5"/><circle cx="50" cy="58" r="7" fill="none" stroke="url(#${g})" stroke-width="2.5"/>`,
+  Huggies: g=>`<circle cx="50" cy="50" r="20" fill="none" stroke="url(#${g})" stroke-width="4"/>`,
+  Charms: g=>`<circle cx="50" cy="54" r="13" fill="none" stroke="url(#${g})" stroke-width="3.5"/>`,
+};
+function cardSVG(cat, idx){
+  const gid='g'+idx;
+  return `<svg width="58" height="58" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E9D3A0"/><stop offset="50%" stop-color="#B8862E"/><stop offset="100%" stop-color="#8A6521"/></linearGradient></defs>${ICONS[cat]?ICONS[cat](gid):''}</svg>`;
+}
+
+function categories(){ return ['All', ...new Set(PRODUCTS.map(p=>p.category))]; }
+function buildToolbar(){
+  const el=document.getElementById('toolbarLinks');
+  el.innerHTML=categories().map(c=>`<button data-cat="${c}" class="${c===state.cat?'active':''}">${c}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.cat;buildToolbar();render();}));
+}
+function applySort(list){
+  const l=[...list];
+  if(state.sort==='price-asc') l.sort((a,b)=>a.sale_price-b.sale_price);
+  if(state.sort==='price-desc') l.sort((a,b)=>b.sale_price-a.sale_price);
+  if(state.sort==='discount-desc') l.sort((a,b)=>((b.price-b.sale_price)/b.price)-((a.price-a.sale_price)/a.price));
+  return l;
+}
+
+function render(){
+  let list = state.cat==='All' ? PRODUCTS : PRODUCTS.filter(p=>p.category===state.cat);
+  list = applySort(list);
+  const grid=document.getElementById('productGrid');
+  grid.innerHTML = list.map((p,i)=>{
+    const soldOut = p.stock<=0;
+    const onSale = p.sale_price < p.price;
+    const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
+    const inCart = CART[p.sku]||0;
+    const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `${cardSVG(p.category,i)}<span class="tag">${p.category}</span>`;
+    return `<div class="card ${soldOut?'is-soldout':''}">
+      <div class="media-box">${media}</div>
+      <h4>${p.name}</h4>
+      <div class="price-line"><span>₹${p.sale_price}</span>${onSale?`<span class="was">₹${p.price}</span>`:''}</div>
+      ${soldOut?'<div class="soldout-note">Currently Unavailable</div>':(onSale?`<div class="save-note">Save ${pct}%</div>`:'')}
+      <button class="add-btn" data-sku="${p.sku}" ${soldOut?'disabled':''}>${soldOut?'Sold Out':(inCart?`In Bag (${inCart}) — Add More`:'Add to Bag')}</button>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.add-btn:not(:disabled)').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.sku)));
+}
+
+function addToCart(sku){
+  const p = PRODUCTS.find(x=>x.sku===sku);
+  const cur = CART[sku]||0;
+  if(cur >= p.stock){ alert(`Only ${p.stock} in stock for ${p.name}.`); return; }
+  CART[sku]=cur+1;
+  updateCount(); render();
+  openDrawer('cart');
+}
+function updateCount(){
+  document.getElementById('cartCount').textContent = Object.values(CART).reduce((a,b)=>a+b,0);
+}
+function cartTotal(){
+  return Object.entries(CART).reduce((sum,[sku,qty])=>{
+    const p=PRODUCTS.find(x=>x.sku===sku); return sum+(p?p.sale_price*qty:0);
+  },0);
+}
+
+/* -------- drawer -------- */
+const drawer=document.getElementById('drawer'), backdrop=document.getElementById('drawerBackdrop');
+function openDrawer(view){ VIEW=view; renderDrawer(); drawer.classList.add('open'); backdrop.classList.add('open'); }
+function closeDrawer(){ drawer.classList.remove('open'); backdrop.classList.remove('open'); }
+document.getElementById('cartToggle').addEventListener('click',()=>openDrawer('cart'));
+document.getElementById('drawerClose').addEventListener('click',closeDrawer);
+backdrop.addEventListener('click',closeDrawer);
+
+function renderDrawer(){
+  const body=document.getElementById('drawerBody'), foot=document.getElementById('drawerFoot'), title=document.getElementById('drawerTitle');
+  const entries=Object.entries(CART);
+
+  if(VIEW==='confirm' && LAST_ORDER){
+    title.textContent='Order Placed';
+    const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(STORE_NAME)}&am=${LAST_ORDER.total}&cu=INR&tn=${LAST_ORDER.order_id}`;
+    const waMsg = encodeURIComponent(`Hi! I placed order ${LAST_ORDER.order_id} (₹${LAST_ORDER.total}). Sharing payment screenshot here.`);
+    body.innerHTML=`<div class="confirm-box">
+      <div style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--rani);">Thank You</div>
+      <div class="oid">${LAST_ORDER.order_id}</div>
+      <p>Your order is saved. To complete it, pay <strong>₹${LAST_ORDER.total}</strong> by UPI and confirm on WhatsApp with your order number.</p>
+      <a class="pay-btn" href="${upiLink}">Pay ₹${LAST_ORDER.total} via UPI</a>
+      <a class="pay-btn alt" href="https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}" target="_blank" rel="noopener">Confirm on WhatsApp</a>
+      <p style="margin-top:14px;">On desktop? Pay to UPI ID <strong>${UPI_ID}</strong> with note "${LAST_ORDER.order_id}".</p>
+    </div>`;
+    foot.innerHTML='';
+    return;
+  }
+
+  if(VIEW==='checkout'){
+    title.textContent='Checkout';
+    body.innerHTML=`
+      <div class="form-field"><label>Full Name</label><input id="f-name" autocomplete="name"></div>
+      <div class="form-field"><label>Phone (WhatsApp)</label><input id="f-phone" autocomplete="tel" inputmode="tel"></div>
+      <div class="form-field"><label>Delivery Address</label><textarea id="f-address" autocomplete="street-address"></textarea></div>
+      <div class="err" id="f-err"></div>`;
+    foot.innerHTML=`
+      <div class="total-row"><span>Total</span><span>₹${cartTotal()}</span></div>
+      <button class="checkout-btn" id="placeOrder">Place Order</button>
+      <button style="width:100%; background:none; border:none; margin-top:10px; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); text-decoration:underline;" id="backToCart">Back to Bag</button>`;
+    document.getElementById('backToCart').addEventListener('click',()=>{VIEW='cart';renderDrawer();});
+    document.getElementById('placeOrder').addEventListener('click',placeOrder);
+    return;
+  }
+
+  title.textContent='Your Bag';
+  if(entries.length===0){
+    body.innerHTML='<p style="font-size:12.5px; color:var(--muted); text-align:center; padding:30px 0;">Your bag is empty.</p>';
+    foot.innerHTML='';
+    return;
+  }
+  body.innerHTML = entries.map(([sku,qty])=>{
+    const p=PRODUCTS.find(x=>x.sku===sku); if(!p) return '';
+    return `<div class="cart-line">
+      <div>
+        <div class="nm">${p.name}</div>
+        <div class="qty-row">
+          <button data-a="dec" data-sku="${sku}">−</button><span>${qty}</span><button data-a="inc" data-sku="${sku}">+</button>
+        </div>
+        <button class="rm-btn" data-a="rm" data-sku="${sku}">Remove</button>
+      </div>
+      <div>₹${p.sale_price*qty}</div>
+    </div>`;
+  }).join('');
+  body.querySelectorAll('button[data-a]').forEach(b=>b.addEventListener('click',()=>{
+    const {a,sku}=b.dataset; const p=PRODUCTS.find(x=>x.sku===sku);
+    if(a==='inc'){ if(CART[sku]<p.stock) CART[sku]++; else alert(`Only ${p.stock} in stock.`); }
+    if(a==='dec'){ CART[sku]--; if(CART[sku]<=0) delete CART[sku]; }
+    if(a==='rm'){ delete CART[sku]; }
+    updateCount(); render(); renderDrawer();
+  }));
+  foot.innerHTML=`
+    <div class="total-row"><span>Total</span><span>₹${cartTotal()}</span></div>
+    <button class="checkout-btn" id="toCheckout">Checkout</button>`;
+  document.getElementById('toCheckout').addEventListener('click',()=>{VIEW='checkout';renderDrawer();});
+}
+
+async function placeOrder(){
+  const name=document.getElementById('f-name').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  const address=document.getElementById('f-address').value.trim();
+  const err=document.getElementById('f-err');
+  err.textContent='';
+  if(name.length<2){ err.textContent='Please enter your name.'; return; }
+  if(phone.replace(/\D/g,'').length<8){ err.textContent='Please enter a valid phone number.'; return; }
+  if(address.length<10){ err.textContent='Please enter your full delivery address.'; return; }
+
+  const items=Object.entries(CART).map(([sku,qty])=>({sku,qty}));
+  const btn=document.getElementById('placeOrder'); btn.disabled=true; btn.textContent='Placing…';
+  try{
+    const res=await fetch('/api/orders',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({customer_name:name, phone, address, items})
+    });
+    const data=await res.json();
+    if(!res.ok){ throw new Error(data.detail || 'Something went wrong.'); }
+    LAST_ORDER=data; CART={}; updateCount();
+    await loadProducts();           // refresh stock counts
+    VIEW='confirm'; renderDrawer();
+  }catch(e){
+    err.textContent=e.message;
+    btn.disabled=false; btn.textContent='Place Order';
+  }
+}
+
+loadProducts();
+</script>
+</body>
+</html>
