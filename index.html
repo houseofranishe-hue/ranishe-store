@@ -188,19 +188,23 @@
 
   .shop-section{ overflow:hidden; }
   #browseView, #categoryRows{ max-width:100%; }
-  /* --- Category browse rows (horizontal scroll) --- */
-  .cat-row{ margin-bottom:46px; }
-  .cat-scroll{ scroll-padding-left:0; }
-  @media (max-width:560px){ .cat-scroll .card{ flex-basis:60%; max-width:60%; } }
-  .cat-row-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
-  .cat-row-head h3{ font-family:'Cormorant Garamond', serif; font-size:clamp(20px,3vw,28px); font-weight:400; color:var(--ink); margin:0; }
-  .cat-row-head .view-all{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--gold); padding:0 0 2px; cursor:pointer; }
-  .cat-scroll{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding:0 2px 6px; scrollbar-width:none; align-items:stretch; }
-  .cat-scroll::-webkit-scrollbar{ display:none; }
-  .cat-scroll .card{ flex:0 0 46%; scroll-snap-align:start; max-width:46%; height:auto; }
-  .cat-scroll .card .media-box{ flex-shrink:0; }
-  .cat-scroll .card h4{ min-height:34px; }
-  @media (min-width:700px){ .cat-scroll .card{ flex-basis:23%; max-width:23%; } }
+  /* --- Shop by collection tiles --- */
+  .collection-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:760px){ .collection-grid{ grid-template-columns:repeat(2,1fr); gap:12px; } }
+  .collection-tile{
+    position:relative; aspect-ratio:3/4; border:none; cursor:pointer; overflow:hidden;
+    background-size:cover; background-position:center; background-color:var(--paper);
+    display:flex; align-items:flex-end; justify-content:flex-start; padding:0; border-radius:2px;
+  }
+  .collection-tile .tile-icon{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.5; }
+  .collection-tile .tile-overlay{ position:absolute; inset:0; background:linear-gradient(to top, rgba(42,26,20,0.55), rgba(42,26,20,0.05) 55%, transparent); }
+  .collection-tile .tile-label{
+    position:relative; z-index:2; color:#fff; text-align:left; padding:14px;
+    font-family:'Cormorant Garamond', serif; font-size:20px; line-height:1.1; letter-spacing:0.02em;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .collection-tile .tile-count{ font-family:'Jost', sans-serif; font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.9; font-weight:400; }
+  .collection-tile:hover .tile-overlay{ background:linear-gradient(to top, rgba(42,26,20,0.65), rgba(42,26,20,0.1) 55%, transparent); }
 
   .grid-head{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:30px; border-bottom:1px solid var(--line); }
   .back-to-browse{ background:none; border:none; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; padding:0; }
@@ -420,26 +424,29 @@ function bindAddButtons(container){
   container.querySelectorAll('.add-btn:not(:disabled)').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.sku)));
 }
 
-// Browse view: a horizontal row per category, with View all
+// Browse view: category tiles (Shop by collection)
 function renderBrowse(){
   const cats = CATEGORY_ORDER.length ? CATEGORY_ORDER : [...new Set(PRODUCTS.map(p=>p.category))];
   const host = document.getElementById('categoryRows');
-  let html = '';
+  let html = '<div class="collection-grid">';
   cats.forEach(cat=>{
     const items = PRODUCTS.filter(p=>matchesCat(p, cat));
     if(items.length===0) return;
-    const preview = items.slice(0, 8);
-    html += `<div class="cat-row">
-      <div class="cat-row-head">
-        <h3>${cat}</h3>
-        <button class="view-all" data-cat="${cat}">View all (${items.length})</button>
-      </div>
-      <div class="cat-scroll">${preview.map((p,i)=>cardHTML(p,i)).join('')}</div>
-    </div>`;
+    // pick a representative product image if any, else icon
+    const withImg = items.find(p=>p.image_url);
+    const bg = withImg
+      ? `background-image:url('${withImg.image_url}');`
+      : '';
+    const iconCat = items[0] ? items[0].category : cat;
+    html += `<button class="collection-tile" data-cat="${cat}" style="${bg}">
+      ${bg ? '' : `<span class="tile-icon">${cardSVG ? cardSVG(iconCat,0) : ''}</span>`}
+      <span class="tile-overlay"></span>
+      <span class="tile-label">${cat}<span class="tile-count">${items.length} pieces</span></span>
+    </button>`;
   });
-  host.innerHTML = html || '<div style="color:var(--muted); font-size:13px;">No products yet.</div>';
-  bindAddButtons(host);
-  host.querySelectorAll('.view-all').forEach(b=>b.addEventListener('click',()=>{ state.cat=b.dataset.cat; showGrid(); }));
+  html += '</div>';
+  host.innerHTML = html;
+  host.querySelectorAll('.collection-tile').forEach(b=>b.addEventListener('click',()=>{ state.cat=b.dataset.cat; showGrid(); }));
 }
 
 function showGrid(){
@@ -474,11 +481,15 @@ function addToCart(sku){
 function updateCount(){
   document.getElementById('cartCount').textContent = Object.values(CART).reduce((a,b)=>a+b,0);
 }
-function cartTotal(){
+function cartSubtotal(){
   return Object.entries(CART).reduce((sum,[sku,qty])=>{
     const p=PRODUCTS.find(x=>x.sku===sku); return sum+(p?p.sale_price*qty:0);
   },0);
 }
+const FREE_SHIP_ABOVE = 999;
+const SHIP_FEE = 60;
+function shippingFee(){ const s=cartSubtotal(); return (s>0 && s<FREE_SHIP_ABOVE) ? SHIP_FEE : 0; }
+function cartTotal(){ return cartSubtotal() + shippingFee(); }
 
 /* -------- drawer -------- */
 const drawer=document.getElementById('drawer'), backdrop=document.getElementById('drawerBackdrop');
@@ -516,6 +527,8 @@ function renderDrawer(){
       <div class="form-field"><label>Delivery Address</label><textarea id="f-address" autocomplete="street-address"></textarea></div>
       <div class="err" id="f-err"></div>`;
     foot.innerHTML=`
+      <div class="total-row" style="margin-bottom:6px;"><span>Subtotal</span><span>₹${cartSubtotal()}</span></div>
+      <div class="total-row" style="margin-bottom:6px; text-transform:none; letter-spacing:0; font-size:12px; color:var(--muted);"><span>Delivery${shippingFee()===0?' (Free)':''}</span><span>${shippingFee()===0?'₹0':'₹'+shippingFee()}</span></div>
       <div class="total-row"><span>Total</span><span>₹${cartTotal()}</span></div>
       <button class="checkout-btn" id="placeOrder">Place Order</button>
       <button style="width:100%; background:none; border:none; margin-top:10px; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); text-decoration:underline;" id="backToCart">Back to Bag</button>`;
@@ -551,6 +564,9 @@ function renderDrawer(){
     updateCount(); render(); renderDrawer();
   }));
   foot.innerHTML=`
+    <div class="total-row" style="margin-bottom:6px;"><span>Subtotal</span><span>₹${cartSubtotal()}</span></div>
+    <div class="total-row" style="margin-bottom:6px; text-transform:none; letter-spacing:0; font-size:12px; color:var(--muted);"><span>Delivery${shippingFee()===0?' (Free)':''}</span><span>${shippingFee()===0?'₹0':'₹'+shippingFee()}</span></div>
+    ${shippingFee()>0?`<div style="font-size:10.5px; color:var(--gold); margin-bottom:10px;">Add ₹${FREE_SHIP_ABOVE-cartSubtotal()} more for free delivery</div>`:''}
     <div class="total-row"><span>Total</span><span>₹${cartTotal()}</span></div>
     <button class="checkout-btn" id="toCheckout">Checkout</button>`;
   document.getElementById('toCheckout').addEventListener('click',()=>{VIEW='checkout';renderDrawer();});

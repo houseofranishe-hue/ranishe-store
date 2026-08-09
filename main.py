@@ -180,6 +180,10 @@ def create_order(order: OrderIn):
             total += row["sale_price"] * item.qty
             cost_total += row["cost_price"] * item.qty
             detailed.append({"sku":row["sku"],"name":row["name"],"qty":item.qty,"unit_price":row["sale_price"]})
+        # delivery charge: Rs 60 for orders below Rs 999, free otherwise
+        subtotal = total
+        shipping = 60 if (0 < subtotal < 999) else 0
+        total = subtotal + shipping
         for item in order.items:
             cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (item.qty, item.sku))
         order_id = "RAN-" + uuid.uuid4().hex[:8].upper()
@@ -191,7 +195,7 @@ def create_order(order: OrderIn):
         conn.commit()
     finally:
         cur.close(); conn.close()
-    return {"order_id": order_id, "total": total, "items": detailed}
+    return {"order_id": order_id, "total": total, "subtotal": subtotal, "shipping": shipping, "items": detailed}
 
 
 # ------------------------------------------------------- admin: products
