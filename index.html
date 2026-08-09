@@ -82,7 +82,7 @@
   .toolbar-links button.active{ color:var(--ink); border-color:var(--ink); }
   .sort-select{ font-family:'Jost'; font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; border:none; background:transparent; color:var(--muted); }
 
-  .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:42px 26px; }
+  .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:42px 26px; align-items:stretch; }
   @media (max-width:980px){ .grid{grid-template-columns:repeat(2,1fr); gap:32px 18px;} }
   @media (max-width:560px){ .grid{ grid-template-columns:repeat(2,1fr); gap:22px 12px; width:100%; } }
   @media (max-width:560px){
@@ -94,21 +94,22 @@
     .toolbar-links button{ font-size:10.5px; }
   }
 
-  .card{ display:flex; flex-direction:column; min-width:0; max-width:100%; }
+  .card{ display:flex; flex-direction:column; min-width:0; max-width:100%; height:100%; }
   .media-box{ height:210px; display:flex; align-items:center; justify-content:center; background:var(--paper); margin-bottom:14px; position:relative; overflow:hidden; }
   .media-box img{ width:100%; max-width:100%; height:100%; object-fit:cover; }
   .media-box .tag{ position:absolute; bottom:9px; left:9px; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
   .card.is-soldout .media-box{ opacity:0.35; }
-  .card h4{ font-size:12px; font-weight:400; letter-spacing:0.05em; margin:0 0 6px; text-transform:uppercase; min-height:30px; overflow-wrap:break-word; word-break:break-word; }
+  .card h4{ font-size:12px; font-weight:400; letter-spacing:0.05em; margin:0 0 6px; text-transform:uppercase; min-height:32px; overflow-wrap:break-word; word-break:break-word; }
   .price-line{ font-size:12.5px; display:flex; gap:8px; align-items:baseline; }
   .price-line .was{ text-decoration:line-through; color:var(--muted); font-size:11.5px; }
   .save-note{ font-size:10.5px; color:var(--ink); margin-top:3px; }
   .soldout-note{ font-size:10.5px; color:var(--muted); text-transform:uppercase; margin-top:3px; }
   .add-btn{
-    margin-top:11px; border:1px solid var(--ink); background:none; padding:10px 0;
+    margin-top:auto; border:1px solid var(--ink); background:none; padding:10px 0;
     font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500;
     transition:background .2s, color .2s;
   }
+  .save-note, .soldout-note{ min-height:14px; }
   .add-btn:hover{ background:var(--ink); color:var(--cream); }
   .add-btn:disabled{ border-color:var(--line); color:var(--muted); cursor:not-allowed; }
 
@@ -187,6 +188,7 @@
 
 
   .shop-section{ overflow:hidden; }
+  #gridView, #detailView, #browseView{ max-width:100%; overflow:hidden; }
   #browseView, #categoryRows{ max-width:100%; }
   /* --- Shop by collection tiles --- */
   .collection-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -198,7 +200,7 @@
   }
   .collection-tile .tile-icon{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.5; }
   .collection-tile .tile-overlay{ position:absolute; inset:0; background:linear-gradient(to top, rgba(42,26,20,0.55), rgba(42,26,20,0.05) 55%, transparent); }
-  .collection-tile .tile-label{
+  .collection-tile .tile-label{ white-space:nowrap;
     position:relative; z-index:2; color:#fff; text-align:left; padding:14px;
     font-family:'Cormorant Garamond', serif; font-size:20px; line-height:1.1; letter-spacing:0.02em;
     display:flex; flex-direction:column; gap:2px;
@@ -217,13 +219,30 @@
   /* --- Collection page (grid view) --- */
   .back-to-browse{ background:none; border:none; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; padding:0; margin-bottom:18px; }
   .back-to-browse:hover{ color:var(--ink); }
-  .collection-title{ font-family:'Cormorant Garamond', serif; font-size:clamp(28px,5vw,42px); font-weight:400; color:var(--ink); text-align:center; margin:0 0 6px; }
+  .collection-title{ font-family:'Cormorant Garamond', serif; font-size:clamp(28px,5vw,42px); font-weight:400; color:var(--ink); text-align:center; margin:0 0 6px; white-space:nowrap; }
   .grid-toolbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 0 22px; border-bottom:1px solid var(--line); margin-bottom:26px; }
   .grid-toolbar .result-count{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
   .pagination{ display:flex; justify-content:center; align-items:center; gap:8px; margin-top:44px; flex-wrap:wrap; }
   .pagination button{ min-width:38px; height:38px; border:1px solid var(--line); background:none; color:var(--ink); font-size:12px; cursor:pointer; border-radius:2px; }
   .pagination button.active{ background:var(--ink); color:var(--cream); border-color:var(--ink); }
   .pagination button:disabled{ opacity:0.35; cursor:not-allowed; }
+
+
+  /* --- Product detail view --- */
+  .detail-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
+  @media (max-width:760px){ .detail-wrap{ grid-template-columns:1fr; gap:24px; } }
+  .detail-media{ background:var(--paper); aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .detail-media img{ width:100%; height:100%; object-fit:cover; }
+  .detail-info h2{ font-family:'Cormorant Garamond', serif; font-size:clamp(26px,4vw,38px); font-weight:400; color:var(--ink); margin:0 0 4px; }
+  .detail-cat{ font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; }
+  .detail-price{ font-size:20px; color:var(--ink); margin-bottom:6px; display:flex; gap:10px; align-items:baseline; }
+  .detail-price .was{ text-decoration:line-through; color:var(--muted); font-size:15px; }
+  .detail-save{ font-size:12px; color:var(--gold); margin-bottom:16px; }
+  .detail-stock{ font-size:12px; letter-spacing:0.04em; text-transform:uppercase; margin:16px 0; padding:8px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .detail-stock.in{ color:var(--ink); } .detail-stock.out{ color:#a33; }
+  .detail-desc{ font-size:13.5px; line-height:1.8; color:var(--muted); margin:16px 0 24px; }
+  .detail-add{ width:100%; background:var(--ink); color:var(--cream); border:none; padding:15px 0; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
+  .detail-add:disabled{ background:var(--muted); cursor:not-allowed; }
 
 </style>
 </head>
@@ -285,6 +304,12 @@
     </div>
     <div class="grid" id="productGrid"></div>
     <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- Product detail view -->
+  <div id="detailView" style="display:none;">
+    <button class="back-to-browse" id="backFromDetail">← Back</button>
+    <div class="detail-wrap" id="detailWrap"></div>
   </div>
 </section>
 
@@ -426,8 +451,10 @@ function cardHTML(p, i){
   const inCart = CART[p.sku]||0;
   const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `${cardSVG(p.category,i)}<span class="tag">${p.category}</span>`;
   return `<div class="card ${soldOut?'is-soldout':''}">
-    <div class="media-box">${media}</div>
-    <h4>${p.name}</h4>
+    <div class="card-open" data-open="${p.sku}" style="cursor:pointer;">
+      <div class="media-box">${media}</div>
+      <h4>${p.name}</h4>
+    </div>
     <div class="price-line"><span>₹${p.sale_price}</span>${onSale?`<span class="was">₹${p.price}</span>`:''}</div>
     ${soldOut?'<div class="soldout-note">Currently Unavailable</div>':(onSale?`<div class="save-note">Save ${pct}%</div>`:'')}
     <button class="add-btn" data-sku="${p.sku}" ${soldOut?'disabled':''}>${soldOut?'Sold Out':(inCart?`In Bag (${inCart})`:'Add to Bag')}</button>
@@ -435,7 +462,8 @@ function cardHTML(p, i){
 }
 
 function bindAddButtons(container){
-  container.querySelectorAll('.add-btn:not(:disabled)').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.sku)));
+  container.querySelectorAll('.add-btn:not(:disabled)').forEach(b=>b.addEventListener('click',(e)=>{e.stopPropagation();addToCart(b.dataset.sku);}));
+  container.querySelectorAll('.card-open').forEach(b=>b.addEventListener('click',()=>showDetail(b.dataset.open)));
 }
 
 // Browse view: category tiles (Shop by collection)
@@ -465,13 +493,43 @@ function renderBrowse(){
 
 function showGrid(){
   document.getElementById('browseView').style.display='none';
+  document.getElementById('detailView').style.display='none';
   document.getElementById('gridView').style.display='block';
-  buildToolbar();
   render();
+  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+}
+
+function showDetail(sku){
+  const p = PRODUCTS.find(x=>x.sku===sku); if(!p) return;
+  const soldOut = p.stock<=0;
+  const onSale = p.sale_price < p.price;
+  const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
+  const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : cardSVG(p.category,0);
+  const desc = p.description || 'Anti-tarnish, hypoallergenic 18K gold-plated stainless steel — waterproof and skin-safe, made for everyday wear.';
+  const stockLine = soldOut
+    ? '<div class="detail-stock out">Currently Unavailable</div>'
+    : `<div class="detail-stock in">In Stock — ${p.stock} available</div>`;
+  document.getElementById('detailWrap').innerHTML = `
+    <div class="detail-media">${media}</div>
+    <div class="detail-info">
+      <div class="detail-cat">${p.category}</div>
+      <h2>${p.name}</h2>
+      <div class="detail-price"><span>₹${p.sale_price}</span>${onSale?`<span class="was">₹${p.price}</span>`:''}</div>
+      ${onSale?`<div class="detail-save">Save ${pct}%</div>`:''}
+      ${stockLine}
+      <div class="detail-desc">${desc}</div>
+      <button class="detail-add" data-sku="${p.sku}" ${soldOut?'disabled':''}>${soldOut?'Sold Out':'Add to Bag'}</button>
+    </div>`;
+  const addBtn = document.querySelector('.detail-add');
+  if(addBtn && !soldOut) addBtn.addEventListener('click',()=>{ addToCart(p.sku); });
+  document.getElementById('browseView').style.display='none';
+  document.getElementById('gridView').style.display='none';
+  document.getElementById('detailView').style.display='block';
   document.getElementById('shop').scrollIntoView({behavior:'smooth'});
 }
 function showBrowse(){
   document.getElementById('gridView').style.display='none';
+  document.getElementById('detailView').style.display='none';
   document.getElementById('browseView').style.display='block';
   document.getElementById('shop').scrollIntoView({behavior:'smooth'});
 }
@@ -648,6 +706,7 @@ async function placeOrder(){
 }
 
 const _back=document.getElementById('backToBrowse'); if(_back) _back.addEventListener('click', showBrowse);
+const _bfd=document.getElementById('backFromDetail'); if(_bfd) _bfd.addEventListener('click', showGrid);
 const _sort=document.getElementById('sortSelect'); if(_sort) _sort.addEventListener('change', e=>{ state.sort=e.target.value; state.page=1; render(); });
 (async()=>{ await loadConfig(); await loadProducts(); })();
 </script>
