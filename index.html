@@ -24,14 +24,16 @@
   
 
   .hero{ padding:0; background:var(--cream); }
-  .hero-heading{ text-align:center; padding:40px 24px 8px; }
+  .hero-heading{ text-align:center; padding:40px 18px 8px; }
   .hero-heading .hero-eyebrow{ font-size:10.5px; letter-spacing:0.32em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
-  .hero-heading h1{ font-family:'Cormorant Garamond', serif; font-size:clamp(34px,5vw,60px); font-weight:400; line-height:1.1; color:var(--ink); letter-spacing:0.01em; }
+  .hero-heading h1{ font-family:'Cormorant Garamond', serif; font-size:clamp(24px,6vw,60px); font-weight:400; line-height:1.12; color:var(--ink); letter-spacing:0.01em; }
+  @media (max-width:560px){ .hero-heading{ padding:26px 16px 6px; } }
   .hero-heading h1 em{ font-style:italic; color:var(--ink); }
   .hero-img-link{ display:block; }
-  .hero-img{ width:100%; height:auto; display:block; }
+  .hero-img{ width:100%; max-width:100%; height:auto; display:block; }
 
 
+  html,body{ overflow-x:hidden; max-width:100%; }
   body{ margin:0; background:var(--cream); color:var(--text); font-family:'Jost', sans-serif; font-weight:300; }
   h1,h2{ font-family:'Cormorant Garamond', serif; font-weight:400; margin:0; }
   a{color:inherit; text-decoration:none;}
@@ -41,7 +43,8 @@
   button{font-family:inherit; cursor:pointer;}
   :focus-visible{outline:1px solid var(--ink); outline-offset:2px;}
 
-  .announce{ text-align:center; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; padding:11px 16px; color:var(--muted); border-bottom:1px solid var(--line); }
+  .announce{ text-align:center; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:11px 16px; color:var(--muted); border-bottom:1px solid var(--line); line-height:1.5; }
+  @media (max-width:560px){ .announce{ font-size:9.5px; letter-spacing:0.06em; padding:9px 12px; } }
 
   header{ position:sticky; top:0; z-index:40; background:rgba(247,243,236,0.95); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
   nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:80px; }
@@ -81,14 +84,22 @@
 
   .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:42px 26px; }
   @media (max-width:980px){ .grid{grid-template-columns:repeat(2,1fr); gap:32px 18px;} }
-  @media (max-width:560px){ .grid{grid-template-columns:1fr;} }
+  @media (max-width:560px){ .grid{ grid-template-columns:repeat(2,1fr); gap:22px 12px; width:100%; } }
+  @media (max-width:560px){
+    .media-box{ height:170px; margin-bottom:10px; }
+    .card h4{ font-size:11px; letter-spacing:0.04em; min-height:28px; }
+    .price-line{ font-size:11.5px; }
+    .add-btn{ font-size:9.5px; padding:9px 0; letter-spacing:0.06em; }
+    .toolbar-links{ gap:14px; }
+    .toolbar-links button{ font-size:10.5px; }
+  }
 
-  .card{ display:flex; flex-direction:column; }
+  .card{ display:flex; flex-direction:column; min-width:0; max-width:100%; }
   .media-box{ height:210px; display:flex; align-items:center; justify-content:center; background:var(--paper); margin-bottom:14px; position:relative; overflow:hidden; }
-  .media-box img{ width:100%; height:100%; object-fit:cover; }
+  .media-box img{ width:100%; max-width:100%; height:100%; object-fit:cover; }
   .media-box .tag{ position:absolute; bottom:9px; left:9px; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
   .card.is-soldout .media-box{ opacity:0.35; }
-  .card h4{ font-size:12.5px; font-weight:400; letter-spacing:0.06em; margin:0 0 6px; text-transform:uppercase; min-height:32px; }
+  .card h4{ font-size:12.5px; font-weight:400; letter-spacing:0.06em; margin:0 0 6px; text-transform:uppercase; min-height:32px; overflow-wrap:break-word; word-break:break-word; }
   .price-line{ font-size:12.5px; display:flex; gap:8px; align-items:baseline; }
   .price-line .was{ text-decoration:line-through; color:var(--muted); font-size:11.5px; }
   .save-note{ font-size:10.5px; color:var(--ink); margin-top:3px; }
@@ -174,6 +185,24 @@
   .ig-float:hover{ transform:translateY(-2px) scale(1.04); box-shadow:0 6px 20px rgba(0,0,0,0.28); }
   @media (max-width:560px){ .ig-float{ right:16px; bottom:76px; width:52px; height:52px; } }
 
+
+  /* --- Category browse rows (horizontal scroll) --- */
+  .cat-row{ margin-bottom:46px; }
+  .cat-row-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+  .cat-row-head h3{ font-family:'Cormorant Garamond', serif; font-size:clamp(20px,3vw,28px); font-weight:400; color:var(--ink); margin:0; }
+  .cat-row-head .view-all{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--gold); padding:0 0 2px; cursor:pointer; }
+  .cat-scroll{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-bottom:6px; scrollbar-width:none; }
+  .cat-scroll::-webkit-scrollbar{ display:none; }
+  .cat-scroll .card{ flex:0 0 46%; scroll-snap-align:start; max-width:46%; }
+  @media (min-width:700px){ .cat-scroll .card{ flex-basis:23%; max-width:23%; } }
+
+  .grid-head{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:30px; border-bottom:1px solid var(--line); }
+  .back-to-browse{ background:none; border:none; font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); cursor:pointer; padding:0; }
+  .back-to-browse:hover{ color:var(--ink); }
+  .toolbar-links-inline{ display:flex; gap:16px; flex-wrap:wrap; flex:1; }
+  .toolbar-links-inline button{ background:none; border:none; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); cursor:pointer; padding:0 0 3px; border-bottom:1px solid transparent; }
+  .toolbar-links-inline button.active{ color:var(--ink); border-color:var(--gold); }
+
 </style>
 </head>
 <body>
@@ -211,18 +240,28 @@
 <section class="section wrap" id="shop">
   <div class="section-head">
     <div class="eyebrow">The Full Edit</div>
-    <h2>Shop All</h2>
+    <h2>Shop</h2>
   </div>
-  <div class="toolbar">
-    <div class="toolbar-links" id="toolbarLinks"></div>
-    <select class="sort-select" id="sortSelect" aria-label="Sort">
-      <option value="featured">Sort: Featured</option>
-      <option value="price-asc">Price, Low to High</option>
-      <option value="price-desc">Price, High to Low</option>
-      <option value="discount-desc">Biggest Saving</option>
-    </select>
+
+  <!-- Category browse view (rows with horizontal scroll + View all) -->
+  <div id="browseView">
+    <div id="categoryRows"><div style="color:var(--muted); font-size:13px;">Loading products…</div></div>
   </div>
-  <div class="grid" id="productGrid"><div style="color:var(--muted); font-size:13px;">Loading products…</div></div>
+
+  <!-- Full grid view (shown when a category / View all is selected) -->
+  <div id="gridView" style="display:none;">
+    <div class="grid-head">
+      <button class="back-to-browse" id="backToBrowse">← All Categories</button>
+      <div class="toolbar-links-inline" id="toolbarLinks"></div>
+      <select class="sort-select" id="sortSelect" aria-label="Sort">
+        <option value="featured">Featured</option>
+        <option value="price-asc">Price, Low to High</option>
+        <option value="price-desc">Price, High to Low</option>
+        <option value="discount-desc">Biggest Saving</option>
+      </select>
+    </div>
+    <div class="grid" id="productGrid"></div>
+  </div>
 </section>
 
 <section class="section wrap" id="faq" style="padding-top:0;">
@@ -313,10 +352,10 @@ async function loadProducts(){
     const res = await fetch('/api/products');
     PRODUCTS = await res.json();
   }catch(e){
-    document.getElementById('productGrid').innerHTML = '<div style="color:var(--muted);">Could not load products. Refresh to try again.</div>';
+    var cr=document.getElementById('categoryRows'); if(cr) cr.innerHTML='<div style="color:var(--muted);">Could not load products. Refresh to try again.</div>';
     return;
   }
-  buildToolbar(); render();
+  renderBrowse();
 }
 
 const ICONS = {
@@ -344,6 +383,7 @@ function matchesCat(p, cat){
 }
 function buildToolbar(){
   const el=document.getElementById('toolbarLinks');
+  if(!el) return;
   el.innerHTML=categories().map(c=>`<button data-cat="${c}" class="${c===state.cat?'active':''}">${c}</button>`).join('');
   el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{state.cat=b.dataset.cat;buildToolbar();render();}));
 }
@@ -355,25 +395,66 @@ function applySort(list){
   return l;
 }
 
+function cardHTML(p, i){
+  const soldOut = p.stock<=0;
+  const onSale = p.sale_price < p.price;
+  const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
+  const inCart = CART[p.sku]||0;
+  const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `${cardSVG(p.category,i)}<span class="tag">${p.category}</span>`;
+  return `<div class="card ${soldOut?'is-soldout':''}">
+    <div class="media-box">${media}</div>
+    <h4>${p.name}</h4>
+    <div class="price-line"><span>₹${p.sale_price}</span>${onSale?`<span class="was">₹${p.price}</span>`:''}</div>
+    ${soldOut?'<div class="soldout-note">Currently Unavailable</div>':(onSale?`<div class="save-note">Save ${pct}%</div>`:'')}
+    <button class="add-btn" data-sku="${p.sku}" ${soldOut?'disabled':''}>${soldOut?'Sold Out':(inCart?`In Bag (${inCart})`:'Add to Bag')}</button>
+  </div>`;
+}
+
+function bindAddButtons(container){
+  container.querySelectorAll('.add-btn:not(:disabled)').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.sku)));
+}
+
+// Browse view: a horizontal row per category, with View all
+function renderBrowse(){
+  const cats = CATEGORY_ORDER.length ? CATEGORY_ORDER : [...new Set(PRODUCTS.map(p=>p.category))];
+  const host = document.getElementById('categoryRows');
+  let html = '';
+  cats.forEach(cat=>{
+    const items = PRODUCTS.filter(p=>matchesCat(p, cat));
+    if(items.length===0) return;
+    const preview = items.slice(0, 8);
+    html += `<div class="cat-row">
+      <div class="cat-row-head">
+        <h3>${cat}</h3>
+        <button class="view-all" data-cat="${cat}">View all (${items.length})</button>
+      </div>
+      <div class="cat-scroll">${preview.map((p,i)=>cardHTML(p,i)).join('')}</div>
+    </div>`;
+  });
+  host.innerHTML = html || '<div style="color:var(--muted); font-size:13px;">No products yet.</div>';
+  bindAddButtons(host);
+  host.querySelectorAll('.view-all').forEach(b=>b.addEventListener('click',()=>{ state.cat=b.dataset.cat; showGrid(); }));
+}
+
+function showGrid(){
+  document.getElementById('browseView').style.display='none';
+  document.getElementById('gridView').style.display='block';
+  buildToolbar();
+  render();
+  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+}
+function showBrowse(){
+  document.getElementById('gridView').style.display='none';
+  document.getElementById('browseView').style.display='block';
+  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+}
+
 function render(){
   let list = PRODUCTS.filter(p=>matchesCat(p, state.cat));
   list = applySort(list);
   const grid=document.getElementById('productGrid');
-  grid.innerHTML = list.map((p,i)=>{
-    const soldOut = p.stock<=0;
-    const onSale = p.sale_price < p.price;
-    const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
-    const inCart = CART[p.sku]||0;
-    const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `${cardSVG(p.category,i)}<span class="tag">${p.category}</span>`;
-    return `<div class="card ${soldOut?'is-soldout':''}">
-      <div class="media-box">${media}</div>
-      <h4>${p.name}</h4>
-      <div class="price-line"><span>₹${p.sale_price}</span>${onSale?`<span class="was">₹${p.price}</span>`:''}</div>
-      ${soldOut?'<div class="soldout-note">Currently Unavailable</div>':(onSale?`<div class="save-note">Save ${pct}%</div>`:'')}
-      <button class="add-btn" data-sku="${p.sku}" ${soldOut?'disabled':''}>${soldOut?'Sold Out':(inCart?`In Bag (${inCart}) — Add More`:'Add to Bag')}</button>
-    </div>`;
-  }).join('');
-  grid.querySelectorAll('.add-btn:not(:disabled)').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.sku)));
+  grid.innerHTML = list.map((p,i)=>cardHTML(p,i)).join('');
+  bindAddButtons(grid);
 }
 
 function addToCart(sku){
@@ -497,6 +578,8 @@ async function placeOrder(){
   }
 }
 
+const _back=document.getElementById('backToBrowse'); if(_back) _back.addEventListener('click', showBrowse);
+const _sort=document.getElementById('sortSelect'); if(_sort) _sort.addEventListener('change', e=>{ state.sort=e.target.value; render(); });
 (async()=>{ await loadConfig(); await loadProducts(); })();
 </script>
 
