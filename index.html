@@ -99,7 +99,7 @@
   .media-box img{ width:100%; max-width:100%; height:100%; object-fit:cover; }
   .media-box .tag{ position:absolute; bottom:9px; left:9px; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
   .card.is-soldout .media-box{ opacity:0.35; }
-  .card h4{ font-size:12.5px; font-weight:400; letter-spacing:0.06em; margin:0 0 6px; text-transform:uppercase; min-height:32px; overflow-wrap:break-word; word-break:break-word; }
+  .card h4{ font-size:12px; font-weight:400; letter-spacing:0.05em; margin:0 0 6px; text-transform:uppercase; min-height:30px; overflow-wrap:break-word; word-break:break-word; }
   .price-line{ font-size:12.5px; display:flex; gap:8px; align-items:baseline; }
   .price-line .was{ text-decoration:line-through; color:var(--muted); font-size:11.5px; }
   .save-note{ font-size:10.5px; color:var(--ink); margin-top:3px; }
@@ -186,14 +186,20 @@
   @media (max-width:560px){ .ig-float{ right:16px; bottom:76px; width:52px; height:52px; } }
 
 
+  .shop-section{ overflow:hidden; }
+  #browseView, #categoryRows{ max-width:100%; }
   /* --- Category browse rows (horizontal scroll) --- */
   .cat-row{ margin-bottom:46px; }
+  .cat-scroll{ scroll-padding-left:0; }
+  @media (max-width:560px){ .cat-scroll .card{ flex-basis:60%; max-width:60%; } }
   .cat-row-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
   .cat-row-head h3{ font-family:'Cormorant Garamond', serif; font-size:clamp(20px,3vw,28px); font-weight:400; color:var(--ink); margin:0; }
   .cat-row-head .view-all{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--gold); padding:0 0 2px; cursor:pointer; }
-  .cat-scroll{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-bottom:6px; scrollbar-width:none; }
+  .cat-scroll{ display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding:0 2px 6px; scrollbar-width:none; align-items:stretch; }
   .cat-scroll::-webkit-scrollbar{ display:none; }
-  .cat-scroll .card{ flex:0 0 46%; scroll-snap-align:start; max-width:46%; }
+  .cat-scroll .card{ flex:0 0 46%; scroll-snap-align:start; max-width:46%; height:auto; }
+  .cat-scroll .card .media-box{ flex-shrink:0; }
+  .cat-scroll .card h4{ min-height:34px; }
   @media (min-width:700px){ .cat-scroll .card{ flex-basis:23%; max-width:23%; } }
 
   .grid-head{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:30px; border-bottom:1px solid var(--line); }
@@ -237,7 +243,7 @@
   </div>
 </div>
 
-<section class="section wrap" id="shop">
+<section class="section wrap shop-section" id="shop">
   <div class="section-head">
     <div class="eyebrow">The Full Edit</div>
     <h2>Shop</h2>
