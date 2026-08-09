@@ -21,7 +21,6 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException, Header, Request
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -328,29 +327,26 @@ def reports(x_admin_token: Optional[str] = Header(None)):
 
 
 # ------------------------------------------------------- pages
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
 @app.get("/")
-def home(): return FileResponse("static/index.html")
-
+def home(): return FileResponse("index.html")
 
 @app.get("/about")
-def page_about(): return FileResponse("static/pages/about.html")
+def page_about(): return FileResponse("page_about.html")
 
 @app.get("/contact")
-def page_contact(): return FileResponse("static/pages/contact.html")
+def page_contact(): return FileResponse("page_contact.html")
 
 @app.get("/refund-policy")
-def page_refund(): return FileResponse("static/pages/refund.html")
+def page_refund(): return FileResponse("page_refund.html")
 
 @app.get("/shipping-policy")
-def page_shipping(): return FileResponse("static/pages/shipping.html")
+def page_shipping(): return FileResponse("page_shipping.html")
 
 @app.get("/privacy-policy")
-def page_privacy(): return FileResponse("static/pages/privacy.html")
+def page_privacy(): return FileResponse("page_privacy.html")
 
 @app.get("/terms")
-def page_terms(): return FileResponse("static/pages/terms.html")
+def page_terms(): return FileResponse("page_terms.html")
 
 @app.get("/admin")
-def admin_page(): return FileResponse("static/admin.html")
+def admin_page(): return FileResponse("admin.html")
