@@ -156,7 +156,7 @@
       <div class="field"><label>Price ₹ (original)</label><input id="m-price" type="number" min="0"></div>
       <div class="field"><label>Sale Price ₹ (what customer pays)</label><input id="m-sale" type="number" min="0"></div>
     </div>
-    <div class="field"><label>Photo</label><input id="m-photo" type="file" accept="image/*"><img id="m-preview" class="preview hidden"></div>
+    <div class="field"><label>Photos (you can select up to 4 — first is the main image)</label><input id="m-photo" type="file" accept="image/*" multiple><div id="m-preview-row" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div></div>
     <div class="field"><label>Description</label><textarea id="m-desc"></textarea></div>
     <div class="err" id="m-err"></div>
     <div class="modal-actions">
@@ -234,7 +234,7 @@ function renderProducts(){
   const list = PRODUCTS.filter(p=>p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term));
   $('prodBody').innerHTML = list.map(p=>`
     <tr>
-      <td>${p.image_url?`<img class="thumb" src="${p.image_url}">`:'<div class="thumb"></div>'}</td>
+      <td>${p.image_url?`<img class="thumb" src="${p.image_url.split(' ||| ')[0]}">`:'<div class="thumb"></div>'}</td>
       <td>${p.name}<br><span style="color:var(--muted); font-size:10.5px;">${p.sku}</span></td>
       <td>${p.category}</td>
       <td class="r">₹${p.cost_price}</td>
@@ -254,33 +254,46 @@ function fillCatSelect(){
 let editingSku = null, photoData = '';
 function openProduct(sku){
   const p = sku ? PRODUCTS.find(x=>x.sku===sku) : null;
-  editingSku = sku; photoData = p ? (p.image_url||'') : '';
+  editingSku = sku; photoList = p && p.image_url ? p.image_url.split(' ||| ').filter(Boolean) : [];
   $('prodModalTitle').textContent = p ? 'Edit Product' : 'Add Product';
   $('m-name').value=p?p.name:''; $('m-sku').value=p?p.sku:''; $('m-sku').disabled=!!p;
   $('m-cost').value=p?p.cost_price:0; $('m-stock').value=p?p.stock:0;
   $('m-price').value=p?p.price:0; $('m-sale').value=p?p.sale_price:0;
   $('m-desc').value=p?(p.description||''):'';
   fillCatSelect(); if(p) $('m-cat').value=p.category;
-  const prev=$('m-preview');
-  if(photoData){ prev.src=photoData; prev.classList.remove('hidden'); } else prev.classList.add('hidden');
+  renderPhotoPreviews();
   $('m-err').textContent=''; $('prodModal').classList.add('open');
 }
 $('addProductBtn').addEventListener('click',()=>openProduct(null));
 $('m-cancel').addEventListener('click',()=>$('prodModal').classList.remove('open'));
 
+let photoList = [];
+function renderPhotoPreviews(){
+  const row=$('m-preview-row');
+  row.innerHTML = photoList.map((src,i)=>`<div style="position:relative;">
+    <img src="${src}" style="width:60px;height:60px;object-fit:cover;border:1px solid #ccc;">
+    <button type="button" data-rm="${i}" style="position:absolute;top:-6px;right:-6px;background:#93124A;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;">×</button>
+  </div>`).join('');
+  row.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{ photoList.splice(+b.dataset.rm,1); renderPhotoPreviews(); }));
+}
 $('m-photo').addEventListener('change', e=>{
-  const file=e.target.files[0]; if(!file) return;
-  if(file.size > 800*1024){ $('m-err').textContent='Please use an image under 800KB (compress it first).'; return; }
-  const reader=new FileReader();
-  reader.onload=()=>{ photoData=reader.result; const prev=$('m-preview'); prev.src=photoData; prev.classList.remove('hidden'); };
-  reader.readAsDataURL(file);
+  const files=Array.from(e.target.files); if(!files.length) return;
+  $('m-err').textContent='';
+  files.slice(0,4).forEach(file=>{
+    if(file.size > 800*1024){ $('m-err').textContent='Each image must be under 800KB (compress large photos first).'; return; }
+    if(photoList.length>=4){ $('m-err').textContent='Maximum 4 photos.'; return; }
+    const reader=new FileReader();
+    reader.onload=()=>{ photoList.push(reader.result); renderPhotoPreviews(); };
+    reader.readAsDataURL(file);
+  });
+  e.target.value=''; // allow re-selecting
 });
 
 $('m-save').addEventListener('click', async ()=>{
   const body={
     sku:$('m-sku').value.trim(), name:$('m-name').value.trim(), category:$('m-cat').value,
     cost_price:+$('m-cost').value||0, price:+$('m-price').value||0, sale_price:+$('m-sale').value||0,
-    stock:+$('m-stock').value||0, image_url:photoData, description:$('m-desc').value.trim()
+    stock:+$('m-stock').value||0, image_url:photoList.join(' ||| '), description:$('m-desc').value.trim()
   };
   if(!body.sku||!body.name){ $('m-err').textContent='Name and SKU are required.'; return; }
   const res=await fetch('/api/admin/products',{method:'POST',headers:H(),body:JSON.stringify(body)});

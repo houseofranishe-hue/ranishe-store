@@ -82,9 +82,9 @@
   .toolbar-links button.active{ color:var(--ink); border-color:var(--ink); }
   .sort-select{ font-family:'Jost'; font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; border:none; background:transparent; color:var(--muted); }
 
-  .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:42px 26px; align-items:stretch; }
-  @media (max-width:980px){ .grid{grid-template-columns:repeat(2,1fr); gap:32px 18px;} }
-  @media (max-width:560px){ .grid{ grid-template-columns:repeat(2,1fr); gap:22px 12px; width:100%; } }
+  .grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:42px 26px; align-items:stretch; width:100%; }
+  @media (max-width:980px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr)); gap:32px 18px;} }
+  @media (max-width:560px){ .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 12px; width:100%; } }
   @media (max-width:560px){
     .media-box{ height:170px; margin-bottom:10px; }
     .card h4{ font-size:11px; letter-spacing:0.04em; min-height:28px; }
@@ -127,7 +127,7 @@
   .qty-row{ display:flex; align-items:center; gap:10px; margin-top:6px; }
   .qty-row button{ width:24px; height:24px; border:1px solid var(--line); background:none; font-size:14px; }
   .rm-btn{ background:none; border:none; font-size:10.5px; color:var(--muted); text-decoration:underline; padding:0; margin-top:6px; }
-  .drawer-foot{ border-top:1px solid var(--line); padding:20px 24px; }
+  .drawer-foot{ border-top:1px solid var(--line); padding:20px 24px 28px; }
   .total-row{ display:flex; justify-content:space-between; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:14px; }
   .checkout-btn{ width:100%; background:var(--ink); color:var(--cream); border:none; padding:14px 0; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; font-weight:500; }
   .checkout-btn:disabled{ background:var(--muted); }
@@ -174,6 +174,7 @@
   }
   .wa-float:hover{ transform:translateY(-2px) scale(1.04); box-shadow:0 6px 20px rgba(0,0,0,0.28); }
   @media (max-width:560px){ .wa-float{ right:16px; bottom:16px; width:52px; height:52px; } }
+  body.drawer-open .wa-float, body.drawer-open .ig-float{ display:none; }
 
 
   .ig-float{
@@ -187,12 +188,12 @@
   @media (max-width:560px){ .ig-float{ right:16px; bottom:76px; width:52px; height:52px; } }
 
 
-  .shop-section{ overflow:hidden; }
-  #gridView, #detailView, #browseView{ max-width:100%; overflow:hidden; }
+  .shop-section{ overflow:visible; }
+  #gridView, #detailView, #browseView{ max-width:100%; }
   #browseView, #categoryRows{ max-width:100%; }
   /* --- Shop by collection tiles --- */
-  .collection-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  @media (max-width:760px){ .collection-grid{ grid-template-columns:repeat(2,1fr); gap:12px; } }
+  .collection-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+  @media (max-width:760px){ .collection-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
   .collection-tile{
     position:relative; aspect-ratio:3/4; border:none; cursor:pointer; overflow:hidden;
     background-size:cover; background-position:center; background-color:var(--paper);
@@ -231,8 +232,14 @@
   /* --- Product detail view --- */
   .detail-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
   @media (max-width:760px){ .detail-wrap{ grid-template-columns:1fr; gap:24px; } }
-  .detail-media{ background:var(--paper); aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .detail-media img{ width:100%; height:100%; object-fit:cover; }
+  .detail-gallery{ display:flex; flex-direction:column; gap:12px; }
+  .detail-main{ background:var(--paper); aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .detail-main img{ width:100%; height:100%; object-fit:cover; }
+  .detail-thumbs{ display:flex; gap:10px; flex-wrap:wrap; }
+  .detail-thumb{ width:64px; height:64px; background:var(--paper); border:1px solid var(--line); overflow:hidden; cursor:pointer; padding:0; flex:0 0 auto; }
+  .detail-thumb.active{ border-color:var(--ink); }
+  .detail-thumb img{ width:100%; height:100%; object-fit:cover; }
+  @media (max-width:760px){ .detail-thumb{ width:56px; height:56px; } }
   .detail-info h2{ font-family:'Cormorant Garamond', serif; font-size:clamp(26px,4vw,38px); font-weight:400; color:var(--ink); margin:0 0 4px; }
   .detail-cat{ font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; }
   .detail-price{ font-size:20px; color:var(--ink); margin-bottom:6px; display:flex; gap:10px; align-items:baseline; }
@@ -449,7 +456,7 @@ function cardHTML(p, i){
   const onSale = p.sale_price < p.price;
   const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
   const inCart = CART[p.sku]||0;
-  const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `${cardSVG(p.category,i)}<span class="tag">${p.category}</span>`;
+  const firstImg = p.image_url ? p.image_url.split(' ||| ')[0] : ''; const media = firstImg ? `<img src="${firstImg}" alt="${p.name}">` : `${cardSVG(p.category,i)}<span class="tag">${p.category}</span>`;
   return `<div class="card ${soldOut?'is-soldout':''}">
     <div class="card-open" data-open="${p.sku}" style="cursor:pointer;">
       <div class="media-box">${media}</div>
@@ -504,13 +511,30 @@ function showDetail(sku){
   const soldOut = p.stock<=0;
   const onSale = p.sale_price < p.price;
   const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
-  const media = p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : cardSVG(p.category,0);
   const desc = p.description || 'Anti-tarnish, hypoallergenic 18K gold-plated stainless steel — waterproof and skin-safe, made for everyday wear.';
   const stockLine = soldOut
     ? '<div class="detail-stock out">Currently Unavailable</div>'
     : `<div class="detail-stock in">In Stock — ${p.stock} available</div>`;
+
+  // Build the image list: prefer p.images (array), else single image_url, else icon
+  let imgs = [];
+  if(Array.isArray(p.images) && p.images.length) imgs = p.images.filter(Boolean);
+  else if(p.image_url && p.image_url.includes(' ||| ')) imgs = p.image_url.split(' ||| ').filter(Boolean);
+  else if(p.image_url) imgs = [p.image_url];
+
+  let gallery;
+  if(imgs.length){
+    const main = `<div class="detail-main" id="detailMain"><img src="${imgs[0]}" alt="${p.name}" id="detailMainImg"></div>`;
+    const thumbs = imgs.length>1
+      ? `<div class="detail-thumbs">${imgs.map((src,i)=>`<button class="detail-thumb ${i===0?'active':''}" data-src="${src}"><img src="${src}" alt=""></button>`).join('')}</div>`
+      : '';
+    gallery = `<div class="detail-gallery">${main}${thumbs}</div>`;
+  } else {
+    gallery = `<div class="detail-gallery"><div class="detail-main">${cardSVG(p.category,0)}</div></div>`;
+  }
+
   document.getElementById('detailWrap').innerHTML = `
-    <div class="detail-media">${media}</div>
+    ${gallery}
     <div class="detail-info">
       <div class="detail-cat">${p.category}</div>
       <h2>${p.name}</h2>
@@ -520,6 +544,15 @@ function showDetail(sku){
       <div class="detail-desc">${desc}</div>
       <button class="detail-add" data-sku="${p.sku}" ${soldOut?'disabled':''}>${soldOut?'Sold Out':'Add to Bag'}</button>
     </div>`;
+
+  // thumbnail clicks swap the main image
+  document.querySelectorAll('.detail-thumb').forEach(t=>t.addEventListener('click',()=>{
+    const mainImg=document.getElementById('detailMainImg');
+    if(mainImg) mainImg.src=t.dataset.src;
+    document.querySelectorAll('.detail-thumb').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+  }));
+
   const addBtn = document.querySelector('.detail-add');
   if(addBtn && !soldOut) addBtn.addEventListener('click',()=>{ addToCart(p.sku); });
   document.getElementById('browseView').style.display='none';
@@ -598,8 +631,8 @@ function cartTotal(){ return cartSubtotal() + shippingFee(); }
 
 /* -------- drawer -------- */
 const drawer=document.getElementById('drawer'), backdrop=document.getElementById('drawerBackdrop');
-function openDrawer(view){ VIEW=view; renderDrawer(); drawer.classList.add('open'); backdrop.classList.add('open'); }
-function closeDrawer(){ drawer.classList.remove('open'); backdrop.classList.remove('open'); }
+function openDrawer(view){ VIEW=view; renderDrawer(); drawer.classList.add('open'); backdrop.classList.add('open'); document.body.classList.add('drawer-open'); }
+function closeDrawer(){ drawer.classList.remove('open'); backdrop.classList.remove('open'); document.body.classList.remove('drawer-open'); }
 document.getElementById('cartToggle').addEventListener('click',()=>openDrawer('cart'));
 document.getElementById('drawerClose').addEventListener('click',closeDrawer);
 backdrop.addEventListener('click',closeDrawer);
