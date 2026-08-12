@@ -352,5 +352,20 @@ def page_privacy(): return FileResponse("page_privacy.html")
 @app.get("/terms")
 def page_terms(): return FileResponse("page_terms.html")
 
+from fastapi.responses import Response
+
+@app.get("/sitemap.xml")
+def sitemap():
+    urls = ["", "about", "contact", "refund-policy", "shipping-policy", "privacy-policy", "terms"]
+    base = "https://houseofranishe.in/"
+    items = "".join(f"<url><loc>{base}{u}</loc><changefreq>weekly</changefreq><priority>{'1.0' if u=='' else '0.7'}</priority></url>" for u in urls)
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</urlset>'
+    return Response(content=xml, media_type="application/xml")
+
+@app.get("/robots.txt")
+def robots():
+    txt = "User-agent: *\nAllow: /\nSitemap: https://houseofranishe.in/sitemap.xml\n"
+    return Response(content=txt, media_type="text/plain")
+
 @app.get("/admin")
 def admin_page(): return FileResponse("admin.html")
