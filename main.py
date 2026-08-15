@@ -435,5 +435,103 @@ def robots():
     txt = "User-agent: *\nAllow: /\nSitemap: https://houseofranishe.in/sitemap.xml\n"
     return Response(content=txt, media_type="text/plain")
 
+
+@app.get("/api/admin/reports/export")
+def export_reports(x_admin_token: Optional[str] = Header(None)):
+    require_admin(x_admin_token)
+    import io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from fastapi.responses import StreamingResponse
+
+    conn = get_conn(); cur = conn.cursor()
+
+    # Gather data
+    cur.execute("SELECT * FROM orders ORDER BY created_at DESC")
+    orders = [dict(r) for r in cur.fetchall()]
+    valid = [o for o in orders if o["status"] != "cancelled"]
+    revenue = sum(o["total"] for o in valid)
+    cogs = sum(o["cost_total"] for o in valid)
+
+    af = "FALSE" if USING_PG else "0"
+    cur.execute(f"SELECT sku,name,category,cost_price,price,sale_price,stock FROM products WHERE archived={af} ORDER BY category,name")
+    prods = [dict(r) for r in cur.fetchall()]
+
+    # units sold
+    sold = {}
+    for o in orders:
+        if o["status"]=="cancelled": continue
+        for it in json.loads(o["items_json"]):
+            sold[it["sku"]] = sold.get(it["sku"],0) + it["qty"]
+    cur.close(); conn.close()
+
+    wb = openpyxl.Workbook()
+    HEAD = Font(name="Arial", bold=True, color="FFFFFF")
+    HFILL = PatternFill("solid", fgColor="3A2A22")
+    GFILL = PatternFill("solid", fgColor="B08D57")
+
+    # Sheet 1: Summary / P&L
+    ws = wb.active; ws.title = "Summary"
+    ws["A1"] = "HOUSE OF RANISHE — BUSINESS REPORT"
+    ws["A1"].font = Font(name="Arial", bold=True, size=14, color="FFFFFF")
+    ws["A1"].fill = HFILL
+    ws.merge_cells("A1:B1")
+    ws["A2"] = "Generated"; ws["B2"] = datetime.now(timezone.utc).strftime("%d %b %Y %H:%M UTC")
+    rows = [
+        ("", ""),
+        ("Revenue (Rs)", revenue),
+        ("Cost of Goods (Rs)", cogs),
+        ("Gross Profit (Rs)", revenue - cogs),
+        ("Total Orders", len(valid)),
+        ("Avg Order Value (Rs)", round(revenue/len(valid)) if valid else 0),
+        ("Products Live", len(prods)),
+        ("Stock Value at Cost (Rs)", sum(p["cost_price"]*p["stock"] for p in prods)),
+        ("Stock Value at Retail (Rs)", sum(p["sale_price"]*p["stock"] for p in prods)),
+        ("Out of Stock Items", sum(1 for p in prods if p["stock"]==0)),
+    ]
+    r = 4
+    for label, val in rows:
+        ws.cell(row=r, column=1, value=label).font = Font(name="Arial", bold=True)
+        ws.cell(row=r, column=2, value=val)
+        r += 1
+    ws.column_dimensions["A"].width = 28; ws.column_dimensions["B"].width = 22
+
+    # Sheet 2: Products (with units sold)
+    ws2 = wb.create_sheet("Products")
+    headers = ["SKU","Name","Category","Cost (Rs)","Price (Rs)","Sale (Rs)","Stock","Units Sold"]
+    for c,h in enumerate(headers, start=1):
+        cell = ws2.cell(row=1, column=c, value=h); cell.font = HEAD; cell.fill = GFILL
+    r = 2
+    for p in prods:
+        vals = [p["sku"],p["name"],p["category"],p["cost_price"],p["price"],p["sale_price"],p["stock"],sold.get(p["sku"],0)]
+        for c,v in enumerate(vals, start=1): ws2.cell(row=r, column=c, value=v)
+        r += 1
+    widths2 = [12,30,14,12,12,12,10,12]
+    for i,w in enumerate(widths2, start=1): ws2.column_dimensions[chr(64+i)].width = w
+    ws2.freeze_panes = "A2"
+
+    # Sheet 3: Orders
+    ws3 = wb.create_sheet("Orders")
+    oh = ["Order ID","Date","Customer","Phone","Items","Total (Rs)","Status"]
+    for c,h in enumerate(oh, start=1):
+        cell = ws3.cell(row=1, column=c, value=h); cell.font = HEAD; cell.fill = GFILL
+    r = 2
+    for o in orders:
+        items = "; ".join(f"{it['name']} x{it['qty']}" for it in json.loads(o["items_json"]))
+        vals = [o["id"], o["created_at"][:16].replace("T"," "), o["customer_name"], o["phone"], items, o["total"], o["status"]]
+        for c,v in enumerate(vals, start=1): ws3.cell(row=r, column=c, value=v)
+        r += 1
+    widths3 = [16,18,20,14,44,12,12]
+    for i,w in enumerate(widths3, start=1): ws3.column_dimensions[chr(64+i)].width = w
+    ws3.freeze_panes = "A2"
+
+    buf = io.BytesIO()
+    wb.save(buf); buf.seek(0)
+    fname = f"ranishe-report-{datetime.now(timezone.utc).strftime('%Y%m%d')}.xlsx"
+    return StreamingResponse(buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={fname}"})
+
+
 @app.get("/admin")
 def admin_page(): return FileResponse("admin.html")

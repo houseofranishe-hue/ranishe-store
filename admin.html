@@ -98,8 +98,16 @@
       <input class="search" id="prodSearch" placeholder="Search products…">
       <button class="btn ghost" id="bulkUploadBtn" style="margin-right:8px;">⬆ Bulk Upload</button><button class="btn danger" id="bulkDeleteBtn" style="margin-right:8px;">🗑 Bulk Delete</button><button class="btn" id="addProductBtn">+ Add Product</button>
     </div>
+    <div id="selectBar" style="display:none; align-items:center; gap:14px; padding:12px 14px; background:var(--paper); border:1px solid var(--line); margin-bottom:12px;">
+      <span id="selCount" style="font-size:12.5px; color:var(--ink);">0 selected</span>
+      <button class="btn danger sm" id="deleteSelectedBtn">Delete Selected</button>
+      <button class="btn ghost sm" id="clearSelBtn">Clear</button>
+    </div>
     <table>
-      <thead><tr><th></th><th>Name</th><th>Category</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Sale</th><th class="r">Stock</th><th></th></tr></thead>
+      <thead><tr>
+        <th style="width:34px;"><input type="checkbox" id="selectAll" title="Select all"></th>
+        <th></th><th>Name</th><th>Category</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Sale</th><th class="r">Stock</th><th></th>
+      </tr></thead>
       <tbody id="prodBody"></tbody>
     </table>
   </section>
@@ -123,6 +131,9 @@
 
   <!-- REPORTS -->
   <section id="tab-reports" class="hidden">
+    <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+      <button class="btn" id="exportExcelBtn">⬇ Export to Excel</button>
+    </div>
     <div class="cards" id="reportCards"></div>
     <div class="rsection">
       <h3>Top Sellers</h3>
@@ -234,6 +245,7 @@ function renderProducts(){
   const list = PRODUCTS.filter(p=>p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term));
   $('prodBody').innerHTML = list.map(p=>`
     <tr>
+      <td><input type="checkbox" class="row-check" data-sku="${p.sku}"></td>
       <td>${p.image_url?`<img class="thumb" src="${p.image_url.split(' ||| ')[0]}">`:'<div class="thumb"></div>'}</td>
       <td>${p.name}<br><span style="color:var(--muted); font-size:10.5px;">${p.sku}</span></td>
       <td>${p.category}</td>
@@ -242,9 +254,23 @@ function renderProducts(){
       <td class="r">₹${p.sale_price}</td>
       <td class="r ${p.stock===0?'soldout':(p.stock<=2?'low':'')}">${p.stock===0?'SOLD OUT':p.stock}</td>
       <td class="r"><button class="btn sm ghost" data-edit="${p.sku}">Edit</button> <button class="btn sm danger" data-del="${p.sku}">Del</button></td>
-    </tr>`).join('') || '<tr><td colspan="8" class="empty">No products.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="9" class="empty">No products.</td></tr>';
   $('prodBody').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>openProduct(b.dataset.edit)));
   $('prodBody').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>delProduct(b.dataset.del)));
+  // wire row checkboxes
+  $('prodBody').querySelectorAll('.row-check').forEach(cb=>cb.addEventListener('change', updateSelBar));
+  const sa=$('selectAll'); if(sa) sa.checked=false;
+  updateSelBar();
+}
+
+function selectedSkus(){
+  return Array.from(document.querySelectorAll('.row-check:checked')).map(cb=>cb.dataset.sku);
+}
+function updateSelBar(){
+  const n=selectedSkus().length;
+  const bar=$('selectBar');
+  if(bar){ bar.style.display = n>0 ? 'flex':'none'; }
+  const cnt=$('selCount'); if(cnt) cnt.textContent = n+' selected';
 }
 
 function fillCatSelect(){
@@ -265,6 +291,36 @@ function openProduct(sku){
   $('m-err').textContent=''; $('prodModal').classList.add('open');
 }
 $('addProductBtn').addEventListener('click',()=>openProduct(null));
+
+// Select all
+document.addEventListener('change', e=>{
+  if(e.target && e.target.id==='selectAll'){
+    document.querySelectorAll('.row-check').forEach(cb=>cb.checked=e.target.checked);
+    updateSelBar();
+  }
+});
+// Clear selection
+document.addEventListener('click', e=>{
+  if(e.target && e.target.id==='clearSelBtn'){
+    document.querySelectorAll('.row-check').forEach(cb=>cb.checked=false);
+    const sa=$('selectAll'); if(sa) sa.checked=false;
+    updateSelBar();
+  }
+});
+// Delete selected
+document.addEventListener('click', async e=>{
+  if(e.target && e.target.id==='deleteSelectedBtn'){
+    const skus=selectedSkus();
+    if(!skus.length) return;
+    if(!confirm(`Delete ${skus.length} selected product(s)? This cannot be undone.`)) return;
+    e.target.disabled=true; e.target.textContent='Deleting…';
+    for(const sku of skus){
+      try{ await fetch('/api/admin/products/'+encodeURIComponent(sku),{method:'DELETE',headers:H()}); }catch(err){}
+    }
+    e.target.disabled=false; e.target.textContent='Delete Selected';
+    await loadAll();
+  }
+});
 $('m-cancel').addEventListener('click',()=>$('prodModal').classList.remove('open'));
 
 let photoList = [];
@@ -364,6 +420,24 @@ async function loadOrders(){
     loadReports();
   }));
 }
+
+/* ---------- export reports to excel ---------- */
+document.addEventListener('click', async e=>{
+  if(e.target && e.target.id==='exportExcelBtn'){
+    const btn=e.target; btn.disabled=true; btn.textContent='Preparing…';
+    try{
+      const res=await fetch('/api/admin/reports/export',{headers:{'X-Admin-Token':TOKEN}});
+      if(!res.ok) throw new Error('Export failed');
+      const blob=await res.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download='ranishe-report.xlsx';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }catch(err){ alert('Could not export: '+err.message); }
+    btn.disabled=false; btn.textContent='⬇ Export to Excel';
+  }
+});
 
 /* ---------- reports ---------- */
 async function loadReports(){
