@@ -554,7 +554,9 @@ function showDetail(sku){
   const desc = p.description || 'Anti-tarnish, hypoallergenic 18K gold-plated stainless steel — waterproof and skin-safe, made for everyday wear.';
   const stockLine = soldOut
     ? '<div class="detail-stock out">Currently Unavailable</div>'
-    : `<div class="detail-stock in">In Stock — ${p.stock} available</div>`;
+    : (p.stock < 3
+        ? '<div class="detail-stock in">Only a few left</div>'
+        : '<div class="detail-stock in">In Stock</div>');
 
   // Build the image list: prefer p.images (array), else single image_url, else icon
   let imgs = [];
@@ -651,7 +653,7 @@ function renderPagination(totalPages, page){
 function addToCart(sku){
   const p = PRODUCTS.find(x=>x.sku===sku);
   const cur = CART[sku]||0;
-  if(cur >= p.stock){ alert(`Only ${p.stock} in stock for ${p.name}.`); return; }
+  if(cur >= p.stock){ alert(`Sorry, no more ${p.name} available right now.`); return; }
   CART[sku]=cur+1;
   updateCount(); render();
   openDrawer('cart');
@@ -736,7 +738,7 @@ function renderDrawer(){
   }).join('');
   body.querySelectorAll('button[data-a]').forEach(b=>b.addEventListener('click',()=>{
     const {a,sku}=b.dataset; const p=PRODUCTS.find(x=>x.sku===sku);
-    if(a==='inc'){ if(CART[sku]<p.stock) CART[sku]++; else alert(`Only ${p.stock} in stock.`); }
+    if(a==='inc'){ if(CART[sku]<p.stock) CART[sku]++; else alert(`Sorry, no more available right now.`); }
     if(a==='dec'){ CART[sku]--; if(CART[sku]<=0) delete CART[sku]; }
     if(a==='rm'){ delete CART[sku]; }
     updateCount(); render(); renderDrawer();
