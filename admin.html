@@ -528,31 +528,40 @@ $('bulk-file').addEventListener('change', e=>{
   reader.readAsText(file);
 });
 
-function parseCSVLine(line){
-  // simple CSV parse handling quoted fields
-  const out=[]; let cur=''; let inQ=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(ch==='"'){ inQ=!inQ; }
-    else if(ch===',' && !inQ){ out.push(cur); cur=''; }
-    else cur+=ch;
+function parseCSV(text){
+  // Full CSV parser: handles quoted fields, escaped quotes (""), and newlines inside quotes.
+  const rows=[]; let row=[]; let cur=''; let inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQ){
+      if(ch==='"'){
+        if(text[i+1]==='"'){ cur+='"'; i++; }   // escaped quote
+        else { inQ=false; }
+      } else { cur+=ch; }
+    } else {
+      if(ch==='"'){ inQ=true; }
+      else if(ch===','){ row.push(cur); cur=''; }
+      else if(ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
+      else if(ch==='\r'){ /* ignore */ }
+      else { cur+=ch; }
+    }
   }
-  out.push(cur);
-  return out.map(s=>s.trim());
+  // last field/row
+  if(cur.length || row.length){ row.push(cur); rows.push(row); }
+  return rows;
 }
 
 $('bulk-submit').addEventListener('click', async ()=>{
   $('bulk-err').textContent=''; $('bulk-result').textContent='';
   const text=$('bulk-text').value.trim();
   if(!text){ $('bulk-err').textContent='Please upload a file or paste rows.'; return; }
-  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  let rows=parseCSV(text).filter(r=>r.some(c=>c && c.trim()));
   // skip header row if it looks like one
-  let start=0;
-  if(lines[0] && /sku/i.test(lines[0]) && /name/i.test(lines[0])) start=1;
+  if(rows[0] && /sku/i.test(rows[0][0]||'') ){ rows=rows.slice(1); }
   const products=[];
-  for(let i=start;i<lines.length;i++){
-    const c=parseCSVLine(lines[i]);
-    if(c.length<3) continue;
+  for(let i=0;i<rows.length;i++){
+    const c=rows[i].map(s=>(s||'').trim());
+    if(c.length<3 || !c[0]) continue;
     products.push({
       sku:c[0], name:c[1], category:c[2],
       cost_price:+(c[3]||0)||0, price:+(c[4]||0)||0, sale_price:+(c[5]||0)||0,
