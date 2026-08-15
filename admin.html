@@ -191,6 +191,64 @@
   </div>
 </div>
 
+<!-- BULK UPLOAD MODAL -->
+<div class="modal-bg" id="bulkModal">
+  <div class="modal" style="width:min(640px,100%);">
+    <h2>Bulk Upload Products</h2>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:14px;">
+      Upload a CSV file (or paste rows below). Columns, in order:<br>
+      <strong>sku, name, category, cost_price, price, sale_price, stock, description</strong><br>
+      Existing SKUs are updated; new ones are added. Categories: Earrings, Chains, Bracelets, Gift Sets (products under ₹499 auto-appear in "Under ₹499").
+    </p>
+    <div class="field">
+      <label>Upload CSV file</label>
+      <input id="bulk-file" type="file" accept=".csv">
+    </div>
+    <div class="field">
+      <label>…or paste rows here (one product per line, comma-separated)</label>
+      <textarea id="bulk-text" style="min-height:120px; font-family:monospace; font-size:12px;" placeholder="RAH001,The Luma Hoops,Earrings,150,399,399,5,Elegant gold hoops"></textarea>
+    </div>
+    <div class="err" id="bulk-err"></div>
+    <div id="bulk-result" style="font-size:12.5px; color:var(--green); margin-bottom:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="bulk-cancel">Cancel</button>
+      <button class="btn" id="bulk-submit">Upload Products</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- BULK DELETE MODAL -->
+<div class="modal-bg" id="bulkDelModal">
+  <div class="modal">
+    <h2 style="color:var(--rani);">Bulk Delete Products</h2>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+      This permanently deletes products. This cannot be undone. Choose what to delete:
+    </p>
+    <div class="field">
+      <label>What to delete</label>
+      <select id="bulkdel-scope">
+        <option value="all">ALL products (everything)</option>
+        <option value="category">All products in one category</option>
+      </select>
+    </div>
+    <div class="field" id="bulkdel-cat-field" style="display:none;">
+      <label>Category</label>
+      <select id="bulkdel-cat"></select>
+    </div>
+    <div class="field">
+      <label>Type <strong>DELETE</strong> to confirm</label>
+      <input id="bulkdel-confirm" placeholder="DELETE">
+    </div>
+    <div class="err" id="bulkdel-err"></div>
+    <div id="bulkdel-result" style="font-size:12.5px; color:var(--rani); margin-bottom:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="bulkdel-cancel">Cancel</button>
+      <button class="btn danger" id="bulkdel-submit">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let TOKEN = sessionStorage.getItem('ranishe_admin') || '';
 let PRODUCTS = [], CATEGORIES = [];
@@ -547,64 +605,5 @@ $('bulkdel-submit').addEventListener('click', async ()=>{
 /* auto-login if token stored */
 if(TOKEN){ tryLogin(TOKEN).then(ok=>{ if(ok) showDash(); else sessionStorage.removeItem('ranishe_admin'); }); }
 </script>
-
-<!-- BULK UPLOAD MODAL -->
-<div class="modal-bg" id="bulkModal">
-  <div class="modal" style="width:min(640px,100%);">
-    <h2>Bulk Upload Products</h2>
-    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:14px;">
-      Upload a CSV file (or paste rows below). Columns, in order:<br>
-      <strong>sku, name, category, cost_price, price, sale_price, stock, description</strong><br>
-      Existing SKUs are updated; new ones are added. Categories: Earrings, Chains, Bracelets, Gift Sets (products under ₹499 auto-appear in "Under ₹499").
-    </p>
-    <div class="field">
-      <label>Upload CSV file</label>
-      <input id="bulk-file" type="file" accept=".csv">
-    </div>
-    <div class="field">
-      <label>…or paste rows here (one product per line, comma-separated)</label>
-      <textarea id="bulk-text" style="min-height:120px; font-family:monospace; font-size:12px;" placeholder="RAH001,The Luma Hoops,Earrings,150,399,399,5,Elegant gold hoops"></textarea>
-    </div>
-    <div class="err" id="bulk-err"></div>
-    <div id="bulk-result" style="font-size:12.5px; color:var(--green); margin-bottom:10px;"></div>
-    <div class="modal-actions">
-      <button class="btn ghost" id="bulk-cancel">Cancel</button>
-      <button class="btn" id="bulk-submit">Upload Products</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- BULK DELETE MODAL -->
-<div class="modal-bg" id="bulkDelModal">
-  <div class="modal">
-    <h2 style="color:var(--rani);">Bulk Delete Products</h2>
-    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-      This permanently deletes products. This cannot be undone. Choose what to delete:
-    </p>
-    <div class="field">
-      <label>What to delete</label>
-      <select id="bulkdel-scope">
-        <option value="all">ALL products (everything)</option>
-        <option value="category">All products in one category</option>
-      </select>
-    </div>
-    <div class="field" id="bulkdel-cat-field" style="display:none;">
-      <label>Category</label>
-      <select id="bulkdel-cat"></select>
-    </div>
-    <div class="field">
-      <label>Type <strong>DELETE</strong> to confirm</label>
-      <input id="bulkdel-confirm" placeholder="DELETE">
-    </div>
-    <div class="err" id="bulkdel-err"></div>
-    <div id="bulkdel-result" style="font-size:12.5px; color:var(--rani); margin-bottom:10px;"></div>
-    <div class="modal-actions">
-      <button class="btn ghost" id="bulkdel-cancel">Cancel</button>
-      <button class="btn danger" id="bulkdel-submit">Delete Permanently</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
