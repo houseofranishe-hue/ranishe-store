@@ -90,6 +90,7 @@
     <button class="tab" data-tab="categories">Categories</button>
     <button class="tab" data-tab="orders">Orders</button>
     <button class="tab" data-tab="reports">Reports &amp; P&amp;L</button>
+    <button class="tab" data-tab="settings">Settings</button>
   </div>
 
   <!-- PRODUCTS -->
@@ -147,6 +148,32 @@
       <h3>Low Stock (≤2 left)</h3>
       <div id="lowStock"></div>
     </div>
+    <div class="rsection">
+      <h3>Website Footfall</h3>
+      <div class="cards" id="analyticsCards" style="margin-bottom:14px;"></div>
+      <h3>Most-Viewed Products</h3>
+      <table><thead><tr><th>Product</th><th class="r">Views</th></tr></thead><tbody id="topViewed"></tbody></table>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-settings" class="hidden">
+    <div class="rsection" style="margin-top:0;">
+      <h3>Offer Banner</h3>
+      <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin:0 0 14px;">
+        Shown as a strip at the very top of the storefront, above the header. Use it for time-limited sales like Raksha Bandhan, festive offers, or free-shipping pushes.
+      </p>
+      <div class="field">
+        <label><input type="checkbox" id="s-banner-enabled" style="width:auto; margin-right:8px;">Show banner on storefront</label>
+      </div>
+      <div class="field">
+        <label>Banner Text</label>
+        <input id="s-banner-text" placeholder="e.g. Raksha Bandhan Sale — Flat 20% Off, Ends Sunday">
+      </div>
+      <div class="err" id="s-err"></div>
+      <div id="s-result" style="font-size:12.5px; color:var(--green); margin-bottom:10px;"></div>
+      <button class="btn" id="s-save">Save Banner</button>
+    </div>
   </section>
 </div>
 
@@ -183,6 +210,11 @@
     <h2>Add / Edit Category</h2>
     <div class="field"><label>Category Name</label><input id="c-name"></div>
     <div class="field"><label>Sort Order (0 = first)</label><input id="c-order" type="number" min="0" value="0"></div>
+    <div class="field">
+      <label>Storefront Tile Image (optional — shown as the background of this category's tile on the shop page)</label>
+      <input id="c-photo" type="file" accept="image/*">
+      <div id="c-preview-wrap" style="margin-top:8px;"></div>
+    </div>
     <div class="err" id="c-err"></div>
     <div class="modal-actions">
       <button class="btn ghost" id="c-cancel">Cancel</button>
@@ -280,11 +312,12 @@ function showDash(){
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   t.classList.add('active');
-  ['products','categories','orders','reports'].forEach(name=>{
+  ['products','categories','orders','reports','settings'].forEach(name=>{
     $('tab-'+name).classList.toggle('hidden', name!==t.dataset.tab);
   });
   if(t.dataset.tab==='orders') loadOrders();
   if(t.dataset.tab==='reports') loadReports();
+  if(t.dataset.tab==='settings') loadSettings();
 }));
 
 /* ---------- load ---------- */
@@ -427,22 +460,41 @@ function renderCategories(){
   const counts={}; PRODUCTS.forEach(p=>counts[p.category]=(counts[p.category]||0)+1);
   $('catBody').innerHTML = CATEGORIES.map(c=>`
     <tr>
-      <td>${c.name}</td>
+      <td>${c.image_url?`<img class="thumb" src="${c.image_url}">`:'<div class="thumb"></div>'} ${c.name}</td>
       <td class="r">${c.sort_order}</td>
       <td class="r">${counts[c.name]||0}</td>
-      <td class="r"><button class="btn sm ghost" data-cedit="${c.name}" data-corder="${c.sort_order}">Edit</button> <button class="btn sm danger" data-cdel="${c.name}">Del</button></td>
+      <td class="r"><button class="btn sm ghost" data-cedit="${c.name}" data-corder="${c.sort_order}" data-cimg="${c.image_url||''}">Edit</button> <button class="btn sm danger" data-cdel="${c.name}">Del</button></td>
     </tr>`).join('');
-  $('catBody').querySelectorAll('[data-cedit]').forEach(b=>b.addEventListener('click',()=>openCat(b.dataset.cedit,b.dataset.corder)));
+  $('catBody').querySelectorAll('[data-cedit]').forEach(b=>b.addEventListener('click',()=>openCat(b.dataset.cedit,b.dataset.corder,b.dataset.cimg)));
   $('catBody').querySelectorAll('[data-cdel]').forEach(b=>b.addEventListener('click',()=>delCat(b.dataset.cdel)));
 }
-function openCat(name,order){
-  $('c-name').value=name||''; $('c-name').disabled=!!name;
-  $('c-order').value=order||0; $('c-err').textContent=''; $('catModal').classList.add('open');
+let catImgData = '';
+function renderCatPreview(){
+  const wrap=$('c-preview-wrap');
+  if(!catImgData){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = `<div style="position:relative; display:inline-block;">
+    <img class="preview" src="${catImgData}">
+    <button type="button" id="c-photo-rm" style="position:absolute;top:-6px;right:-6px;background:#93124A;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;">×</button>
+  </div>`;
+  $('c-photo-rm').addEventListener('click',()=>{ catImgData=''; renderCatPreview(); });
 }
-$('addCatBtn').addEventListener('click',()=>openCat('',0));
+function openCat(name,order,imageUrl){
+  $('c-name').value=name||''; $('c-name').disabled=!!name;
+  $('c-order').value=order||0; catImgData = imageUrl||''; renderCatPreview();
+  $('c-photo').value=''; $('c-err').textContent=''; $('catModal').classList.add('open');
+}
+$('addCatBtn').addEventListener('click',()=>openCat('',0,''));
 $('c-cancel').addEventListener('click',()=>$('catModal').classList.remove('open'));
+$('c-photo').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  $('c-err').textContent='';
+  if(file.size > 800*1024){ $('c-err').textContent='Image must be under 800KB (compress it first).'; e.target.value=''; return; }
+  const reader=new FileReader();
+  reader.onload=()=>{ catImgData=reader.result; renderCatPreview(); };
+  reader.readAsDataURL(file);
+});
 $('c-save').addEventListener('click', async ()=>{
-  const body={name:$('c-name').value.trim(), sort_order:+$('c-order').value||0};
+  const body={name:$('c-name').value.trim(), sort_order:+$('c-order').value||0, image_url:catImgData};
   if(!body.name){ $('c-err').textContent='Name required.'; return; }
   const res=await fetch('/api/admin/categories',{method:'POST',headers:H(),body:JSON.stringify(body)});
   if(!res.ok){ $('c-err').textContent='Could not save.'; return; }
@@ -514,7 +566,32 @@ async function loadReports(){
   $('topSellers').innerHTML = r.top_sellers.filter(t=>t.units>0).map(t=>`<tr><td>${t.name}</td><td class="r">${t.units}</td></tr>`).join('') || '<tr><td colspan="2" class="empty">No sales yet.</td></tr>';
   $('outStock').innerHTML = r.out_of_stock.length? r.out_of_stock.map(p=>`<span style="display:inline-block; margin:0 8px 8px 0; font-size:12px; color:var(--rani);">${p.name}</span>`).join('') : '<div class="empty">Nothing out of stock. 🎉</div>';
   $('lowStock').innerHTML = r.low_stock.length? r.low_stock.map(p=>`<span style="display:inline-block; margin:0 8px 8px 0; font-size:12px; color:var(--gold);">${p.name} (${p.stock})</span>`).join('') : '<div class="empty">No low-stock items.</div>';
+
+  const a=await fetch('/api/admin/analytics',{headers:H()}).then(x=>x.json());
+  $('analyticsCards').innerHTML = `
+    <div class="rcard"><div class="label">Total Visits</div><div class="val">${a.total_visits.toLocaleString('en-IN')}</div></div>
+    <div class="rcard"><div class="label">Products Tracked</div><div class="val">${a.top_viewed.length}</div></div>`;
+  $('topViewed').innerHTML = a.top_viewed.length? a.top_viewed.map(v=>`<tr><td>${v.name}</td><td class="r">${v.views}</td></tr>`).join('') : '<tr><td colspan="2" class="empty">No product views yet.</td></tr>';
 }
+
+/* ---------- settings (offer banner) ---------- */
+async function loadSettings(){
+  $('s-err').textContent=''; $('s-result').textContent='';
+  const s=await fetch('/api/admin/settings',{headers:H()}).then(x=>x.json());
+  $('s-banner-text').value = s.banner_text||'';
+  $('s-banner-enabled').checked = !!s.banner_enabled;
+}
+$('s-save').addEventListener('click', async ()=>{
+  $('s-err').textContent=''; $('s-result').textContent='';
+  const body={ banner_text:$('s-banner-text').value.trim(), banner_enabled:$('s-banner-enabled').checked };
+  const btn=$('s-save'); btn.disabled=true; btn.textContent='Saving…';
+  try{
+    const res=await fetch('/api/admin/settings',{method:'POST',headers:H(),body:JSON.stringify(body)});
+    if(!res.ok) throw new Error('Could not save.');
+    $('s-result').textContent='✓ Banner saved.';
+  }catch(e){ $('s-err').textContent=e.message; }
+  btn.disabled=false; btn.textContent='Save Banner';
+});
 
 
 /* ---------- bulk upload ---------- */

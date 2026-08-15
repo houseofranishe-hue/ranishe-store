@@ -86,6 +86,9 @@
   .announce{ text-align:center; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:11px 16px; color:var(--muted); border-bottom:1px solid var(--line); line-height:1.5; }
   @media (max-width:560px){ .announce{ font-size:9.5px; letter-spacing:0.06em; padding:9px 12px; } }
 
+  .offer-banner{ text-align:center; font-family:'Jost', sans-serif; font-size:12px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; padding:11px 16px; color:#fff; background:var(--rani); line-height:1.5; }
+  @media (max-width:560px){ .offer-banner{ font-size:10px; letter-spacing:0.03em; padding:9px 12px; } }
+
   header{ position:sticky; top:0; z-index:40; background:rgba(247,243,236,0.95); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
   nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:80px; }
   .brand{ font-family:'Jost', sans-serif; font-weight:600; font-size:13.5px; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink); }
@@ -139,8 +142,8 @@
   .media-box img{ width:100%; height:100%; max-width:100%; object-fit:contain; }
   .media-box .tag{ position:absolute; bottom:9px; left:9px; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
   .card.is-soldout .media-box{ opacity:0.35; }
-  .card h4{ font-size:12px; font-weight:400; letter-spacing:0.05em; margin:0 0 6px; text-transform:uppercase; min-height:32px; overflow-wrap:break-word; word-break:break-word; }
-  .price-line{ font-size:12.5px; display:flex; gap:8px; align-items:baseline; }
+  .card h4{ font-family:'Jost', sans-serif; font-size:12px; font-weight:400; letter-spacing:0.05em; margin:0 0 6px; text-transform:uppercase; min-height:32px; overflow-wrap:break-word; word-break:break-word; }
+  .price-line{ font-family:'Jost', sans-serif; font-size:12.5px; display:flex; gap:8px; align-items:baseline; }
   .price-line .was{ text-decoration:line-through; color:var(--muted); font-size:11.5px; }
   .save-note{ font-size:10.5px; color:var(--ink); margin-top:3px; }
   .soldout-note{ font-size:10.5px; color:var(--muted); text-transform:uppercase; margin-top:3px; }
@@ -196,13 +199,13 @@
   .foot-links a:hover{ color:var(--ink); }
   .foot-bottom{ margin-top:26px; font-size:10.5px; color:var(--muted); letter-spacing:0.04em; }
 
-  .faq-list{ max-width:720px; margin:0 auto; }
+  .faq-list{ max-width:720px; margin:0 auto; font-family:'Jost', sans-serif; }
   .faq-list details{ border-bottom:1px solid var(--line); padding:20px 4px; }
-  .faq-list summary{ cursor:pointer; font-size:13.5px; letter-spacing:0.04em; color:var(--ink); list-style:none; display:flex; justify-content:space-between; align-items:center; font-weight:400; }
+  .faq-list summary{ font-family:'Jost', sans-serif; cursor:pointer; font-size:13.5px; letter-spacing:0.04em; color:var(--ink); list-style:none; display:flex; justify-content:space-between; align-items:center; font-weight:400; }
   .faq-list summary::-webkit-details-marker{ display:none; }
   .faq-list summary::after{ content:'+'; font-size:20px; color:var(--gold); font-weight:300; margin-left:16px; }
   .faq-list details[open] summary::after{ content:'\2013'; }
-  .faq-list details p{ margin:14px 0 2px; font-size:13.5px; line-height:1.8; color:var(--muted); }
+  .faq-list details p{ font-family:'Jost', sans-serif; margin:14px 0 2px; font-size:13.5px; line-height:1.8; color:var(--muted); }
   .faq-list details p strong{ color:var(--ink); font-weight:500; }
 
 
@@ -282,12 +285,12 @@
   @media (max-width:760px){ .detail-thumb{ width:56px; height:56px; } }
   .detail-info h2{ font-family:'Cormorant Garamond', serif; font-size:clamp(26px,4vw,38px); font-weight:400; color:var(--ink); margin:0 0 4px; }
   .detail-cat{ font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; }
-  .detail-price{ font-size:20px; color:var(--ink); margin-bottom:6px; display:flex; gap:10px; align-items:baseline; }
+  .detail-price{ font-family:'Jost', sans-serif; font-size:20px; color:var(--ink); margin-bottom:6px; display:flex; gap:10px; align-items:baseline; }
   .detail-price .was{ text-decoration:line-through; color:var(--muted); font-size:15px; }
   .detail-save{ font-size:12px; color:var(--gold); margin-bottom:16px; }
   .detail-stock{ font-size:12px; letter-spacing:0.04em; text-transform:uppercase; margin:16px 0; padding:8px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
   .detail-stock.in{ color:var(--ink); } .detail-stock.out{ color:#a33; }
-  .detail-desc{ font-size:13.5px; line-height:1.8; color:var(--muted); margin:16px 0 24px; }
+  .detail-desc{ font-family:'Jost', sans-serif; font-size:13.5px; line-height:1.8; color:var(--muted); margin:16px 0 24px; }
   .detail-add{ width:100%; background:var(--ink); color:var(--cream); border:none; padding:15px 0; font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; }
   .detail-add:disabled{ background:var(--muted); cursor:not-allowed; }
 
@@ -295,6 +298,7 @@
 </head>
 <body>
 
+<div class="offer-banner" id="offerBanner" style="display:none;"></div>
 <div class="announce">Water-Resistant · Anti-Tarnish · Stainless Steel · 18K Gold Plated</div>
 
 <header>
@@ -439,6 +443,11 @@ async function loadConfig(){
     WHATSAPP_NUMBER = cfg.whatsapp || WHATSAPP_NUMBER;
     UPI_ID = cfg.upi_id || UPI_ID;
     STORE_NAME = cfg.store_name || STORE_NAME;
+    const banner = document.getElementById('offerBanner');
+    if(banner){
+      if(cfg.banner_enabled && cfg.banner_text){ banner.textContent = cfg.banner_text; banner.style.display = 'block'; }
+      else { banner.style.display = 'none'; }
+    }
   }catch(e){}
   try{
     const cats = await fetch('/api/categories').then(r=>r.json());
@@ -557,6 +566,7 @@ function showGrid(){
 
 function showDetail(sku){
   const p = PRODUCTS.find(x=>x.sku===sku); if(!p) return;
+  try{ fetch('/api/track/view/'+encodeURIComponent(sku), {method:'POST'}); }catch(e){}
   const soldOut = p.stock<=0;
   const onSale = p.sale_price < p.price;
   const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
@@ -796,6 +806,14 @@ async function placeOrder(){
 const _back=document.getElementById('backToBrowse'); if(_back) _back.addEventListener('click', showBrowse);
 const _bfd=document.getElementById('backFromDetail'); if(_bfd) _bfd.addEventListener('click', showGrid);
 const _sort=document.getElementById('sortSelect'); if(_sort) _sort.addEventListener('change', e=>{ state.sort=e.target.value; state.page=1; render(); });
+// Track a footfall once per browser session (not on every internal navigation).
+try{
+  if(!sessionStorage.getItem('ranishe_visit_logged')){
+    sessionStorage.setItem('ranishe_visit_logged','1');
+    fetch('/api/track/visit', {method:'POST'});
+  }
+}catch(e){}
+
 (async()=>{ await loadConfig(); await loadProducts(); })();
 </script>
 

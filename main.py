@@ -57,7 +57,7 @@ def q(sql: str) -> str:
 def init_db():
     conn = get_conn(); cur = conn.cursor()
     if USING_PG:
-        cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0)""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0, image_url TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS products (
             sku TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL,
             cost_price INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL, sale_price INTEGER NOT NULL,
@@ -67,8 +67,12 @@ def init_db():
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
             phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
             total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new')""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS analytics_events (
+            id SERIAL PRIMARY KEY, created_at TEXT NOT NULL, kind TEXT NOT NULL, sku TEXT)""")
+        cur.execute("ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT ''")
     else:
-        cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0)""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0, image_url TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS products (
             sku TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL,
             cost_price INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL, sale_price INTEGER NOT NULL,
@@ -78,6 +82,14 @@ def init_db():
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
             phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
             total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new')""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS analytics_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, kind TEXT NOT NULL, sku TEXT)""")
+        # migrate older sqlite DBs created before image_url existed on categories
+        cur.execute("PRAGMA table_info(categories)")
+        cols = [row[1] for row in cur.fetchall()]
+        if "image_url" not in cols:
+            cur.execute("ALTER TABLE categories ADD COLUMN image_url TEXT DEFAULT ''")
 
     cur.execute("SELECT COUNT(*) AS c FROM products")
     row = cur.fetchone()
@@ -122,6 +134,12 @@ class ProductIn(BaseModel):
 class CategoryIn(BaseModel):
     name: str = Field(min_length=1, max_length=60)
     sort_order: int = 0
+    image_url: str = ""
+
+
+class SettingsIn(BaseModel):
+    banner_text: str = ""
+    banner_enabled: bool = False
 
 
 class OrderItem(BaseModel):
@@ -137,15 +155,28 @@ class OrderIn(BaseModel):
 
 
 # ------------------------------------------------------- storefront API
+def get_setting(key: str, default: str = "") -> str:
+    conn = get_conn(); cur = conn.cursor()
+    cur.execute(q("SELECT value FROM settings WHERE key=%s"), (key,))
+    row = cur.fetchone(); cur.close(); conn.close()
+    if row is None:
+        return default
+    row = dict(row)
+    return row["value"] if row["value"] is not None else default
+
+
 @app.get("/api/config")
 def config():
-    return PUBLIC_CONFIG
+    out = dict(PUBLIC_CONFIG)
+    out["banner_text"] = get_setting("banner_text", "")
+    out["banner_enabled"] = get_setting("banner_enabled", "false") == "true"
+    return out
 
 
 @app.get("/api/categories")
 def list_categories():
     conn = get_conn(); cur = conn.cursor()
-    cur.execute("SELECT name, sort_order FROM categories ORDER BY sort_order, name")
+    cur.execute("SELECT name, sort_order, image_url FROM categories ORDER BY sort_order, name")
     rows = cur.fetchall(); cur.close(); conn.close()
     return [dict(r) for r in rows]
 
@@ -311,9 +342,9 @@ def upsert_category(c: CategoryIn, x_admin_token: Optional[str] = Header(None)):
     conn = get_conn(); cur = conn.cursor()
     cur.execute(q("SELECT name FROM categories WHERE name=%s"), (c.name,))
     if cur.fetchone():
-        cur.execute(q("UPDATE categories SET sort_order=%s WHERE name=%s"), (c.sort_order, c.name))
+        cur.execute(q("UPDATE categories SET sort_order=%s, image_url=%s WHERE name=%s"), (c.sort_order, c.image_url, c.name))
     else:
-        cur.execute(q("INSERT INTO categories (name,sort_order) VALUES (%s,%s)"), (c.name, c.sort_order))
+        cur.execute(q("INSERT INTO categories (name,sort_order,image_url) VALUES (%s,%s,%s)"), (c.name, c.sort_order, c.image_url))
     conn.commit(); cur.close(); conn.close()
     return {"ok": True}
 
@@ -325,6 +356,72 @@ def delete_category(name: str, x_admin_token: Optional[str] = Header(None)):
     cur.execute(q("DELETE FROM categories WHERE name=%s"), (name,))
     conn.commit(); cur.close(); conn.close()
     return {"ok": True}
+
+
+# ------------------------------------------------------- admin: settings (offer banner, etc.)
+@app.get("/api/admin/settings")
+def get_settings(x_admin_token: Optional[str] = Header(None)):
+    require_admin(x_admin_token)
+    return {
+        "banner_text": get_setting("banner_text", ""),
+        "banner_enabled": get_setting("banner_enabled", "false") == "true",
+    }
+
+
+@app.post("/api/admin/settings")
+def save_settings(s: SettingsIn, x_admin_token: Optional[str] = Header(None)):
+    require_admin(x_admin_token)
+    conn = get_conn(); cur = conn.cursor()
+    for key, val in (("banner_text", s.banner_text), ("banner_enabled", "true" if s.banner_enabled else "false")):
+        if USING_PG:
+            cur.execute("""INSERT INTO settings (key,value) VALUES (%s,%s)
+                           ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value""", (key, val))
+        else:
+            cur.execute("INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)", (key, val))
+    conn.commit(); cur.close(); conn.close()
+    return {"ok": True}
+
+
+# ------------------------------------------------------- footfall / analytics
+@app.post("/api/track/visit")
+def track_visit():
+    conn = get_conn(); cur = conn.cursor()
+    cur.execute(q("INSERT INTO analytics_events (created_at,kind,sku) VALUES (%s,%s,%s)"),
+                (datetime.now(timezone.utc).isoformat(timespec="seconds"), "visit", None))
+    conn.commit(); cur.close(); conn.close()
+    return {"ok": True}
+
+
+@app.post("/api/track/view/{sku}")
+def track_product_view(sku: str):
+    conn = get_conn(); cur = conn.cursor()
+    cur.execute(q("INSERT INTO analytics_events (created_at,kind,sku) VALUES (%s,%s,%s)"),
+                (datetime.now(timezone.utc).isoformat(timespec="seconds"), "product_view", sku))
+    conn.commit(); cur.close(); conn.close()
+    return {"ok": True}
+
+
+@app.get("/api/admin/analytics")
+def admin_analytics(x_admin_token: Optional[str] = Header(None)):
+    require_admin(x_admin_token)
+    conn = get_conn(); cur = conn.cursor()
+
+    cur.execute(q("SELECT COUNT(*) AS c FROM analytics_events WHERE kind=%s"), ("visit",))
+    row = cur.fetchone()
+    total_visits = row["c"] if isinstance(row, dict) else row[0]
+
+    cur.execute(q("SELECT sku, COUNT(*) AS views FROM analytics_events WHERE kind=%s GROUP BY sku ORDER BY views DESC LIMIT 10"), ("product_view",))
+    view_rows = [dict(r) for r in cur.fetchall()]
+
+    names = {}
+    if view_rows:
+        cur.execute("SELECT sku, name FROM products")
+        for r in cur.fetchall():
+            r = dict(r); names[r["sku"]] = r["name"]
+
+    cur.close(); conn.close()
+    top_viewed = [{"sku": r["sku"], "name": names.get(r["sku"], r["sku"]), "views": r["views"]} for r in view_rows]
+    return {"total_visits": total_visits, "top_viewed": top_viewed}
 
 
 # ------------------------------------------------------- admin: orders + reports
