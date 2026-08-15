@@ -551,7 +551,11 @@ function showDetail(sku){
   const soldOut = p.stock<=0;
   const onSale = p.sale_price < p.price;
   const pct = onSale ? Math.round((1-p.sale_price/p.price)*100) : 0;
-  const desc = p.description || 'Anti-tarnish, hypoallergenic 18K gold-plated stainless steel — waterproof and skin-safe, made for everyday wear.';
+  const rawDesc = p.description || 'Anti-tarnish, hypoallergenic 18K gold-plated stainless steel — waterproof and skin-safe, made for everyday wear.';
+  const desc = rawDesc
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\r\n|\r|\n/g,'<br>')
+    .replace(/\s*\|\s*/g,'<br>');
   const stockLine = soldOut
     ? '<div class="detail-stock out">Currently Unavailable</div>'
     : (p.stock < 3
