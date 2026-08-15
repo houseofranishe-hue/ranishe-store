@@ -96,7 +96,7 @@
   <section id="tab-products">
     <div class="toolbar">
       <input class="search" id="prodSearch" placeholder="Search products…">
-      <button class="btn ghost" id="bulkUploadBtn" style="margin-right:8px;">⬆ Bulk Upload</button><button class="btn" id="addProductBtn">+ Add Product</button>
+      <button class="btn ghost" id="bulkUploadBtn" style="margin-right:8px;">⬆ Bulk Upload</button><button class="btn danger" id="bulkDeleteBtn" style="margin-right:8px;">🗑 Bulk Delete</button><button class="btn" id="addProductBtn">+ Add Product</button>
     </div>
     <table>
       <thead><tr><th></th><th>Name</th><th>Category</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Sale</th><th class="r">Stock</th><th></th></tr></thead>
@@ -440,6 +440,36 @@ $('bulk-submit').addEventListener('click', async ()=>{
   btn.disabled=false; btn.textContent='Upload Products';
 });
 
+
+/* ---------- bulk delete ---------- */
+$('bulkDeleteBtn').addEventListener('click',()=>{
+  $('bulkdel-err').textContent=''; $('bulkdel-result').textContent=''; $('bulkdel-confirm').value='';
+  $('bulkdel-scope').value='all'; $('bulkdel-cat-field').style.display='none';
+  // populate categories
+  $('bulkdel-cat').innerHTML = CATEGORIES.map(c=>`<option>${c.name}</option>`).join('');
+  $('bulkDelModal').classList.add('open');
+});
+$('bulkdel-cancel').addEventListener('click',()=>$('bulkDelModal').classList.remove('open'));
+$('bulkdel-scope').addEventListener('change', e=>{
+  $('bulkdel-cat-field').style.display = e.target.value==='category' ? 'block':'none';
+});
+$('bulkdel-submit').addEventListener('click', async ()=>{
+  $('bulkdel-err').textContent='';
+  if($('bulkdel-confirm').value.trim()!=='DELETE'){ $('bulkdel-err').textContent='Type DELETE (in capitals) to confirm.'; return; }
+  const scope=$('bulkdel-scope').value;
+  const body = scope==='all' ? {all:true} : {category:$('bulkdel-cat').value};
+  const btn=$('bulkdel-submit'); btn.disabled=true; btn.textContent='Deleting…';
+  try{
+    const res=await fetch('/api/admin/products/bulk-delete',{method:'POST',headers:H(),body:JSON.stringify(body)});
+    const data=await res.json();
+    if(!res.ok){ throw new Error(data.detail||'Delete failed.'); }
+    $('bulkdel-result').textContent=`✓ ${data.deleted} products deleted.`;
+    await loadAll();
+    setTimeout(()=>$('bulkDelModal').classList.remove('open'), 1200);
+  }catch(e){ $('bulkdel-err').textContent=e.message; }
+  btn.disabled=false; btn.textContent='Delete Permanently';
+});
+
 /* auto-login if token stored */
 if(TOKEN){ tryLogin(TOKEN).then(ok=>{ if(ok) showDash(); else sessionStorage.removeItem('ranishe_admin'); }); }
 </script>
@@ -466,6 +496,38 @@ if(TOKEN){ tryLogin(TOKEN).then(ok=>{ if(ok) showDash(); else sessionStorage.rem
     <div class="modal-actions">
       <button class="btn ghost" id="bulk-cancel">Cancel</button>
       <button class="btn" id="bulk-submit">Upload Products</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- BULK DELETE MODAL -->
+<div class="modal-bg" id="bulkDelModal">
+  <div class="modal">
+    <h2 style="color:var(--rani);">Bulk Delete Products</h2>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+      This permanently deletes products. This cannot be undone. Choose what to delete:
+    </p>
+    <div class="field">
+      <label>What to delete</label>
+      <select id="bulkdel-scope">
+        <option value="all">ALL products (everything)</option>
+        <option value="category">All products in one category</option>
+      </select>
+    </div>
+    <div class="field" id="bulkdel-cat-field" style="display:none;">
+      <label>Category</label>
+      <select id="bulkdel-cat"></select>
+    </div>
+    <div class="field">
+      <label>Type <strong>DELETE</strong> to confirm</label>
+      <input id="bulkdel-confirm" placeholder="DELETE">
+    </div>
+    <div class="err" id="bulkdel-err"></div>
+    <div id="bulkdel-result" style="font-size:12.5px; color:var(--rani); margin-bottom:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="bulkdel-cancel">Cancel</button>
+      <button class="btn danger" id="bulkdel-submit">Delete Permanently</button>
     </div>
   </div>
 </div>

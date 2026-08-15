@@ -278,6 +278,32 @@ def delete_product(sku: str, x_admin_token: Optional[str] = Header(None)):
     return {"ok": True}
 
 
+class BulkDelete(BaseModel):
+    skus: List[str] = []
+    category: Optional[str] = None
+    all: bool = False
+
+@app.post("/api/admin/products/bulk-delete")
+def bulk_delete_products(payload: BulkDelete, x_admin_token: Optional[str] = Header(None)):
+    require_admin(x_admin_token)
+    conn = get_conn(); cur = conn.cursor()
+    deleted = 0
+    if payload.all:
+        cur.execute("SELECT COUNT(*) AS c FROM products")
+        row = cur.fetchone(); deleted = row["c"] if isinstance(row, dict) else row[0]
+        cur.execute("DELETE FROM products")
+    elif payload.category:
+        cur.execute(q("SELECT COUNT(*) AS c FROM products WHERE category=%s"), (payload.category,))
+        row = cur.fetchone(); deleted = row["c"] if isinstance(row, dict) else row[0]
+        cur.execute(q("DELETE FROM products WHERE category=%s"), (payload.category,))
+    elif payload.skus:
+        for sku in payload.skus:
+            cur.execute(q("DELETE FROM products WHERE sku=%s"), (sku,))
+            deleted += 1
+    conn.commit(); cur.close(); conn.close()
+    return {"ok": True, "deleted": deleted}
+
+
 # ------------------------------------------------------- admin: categories
 @app.post("/api/admin/categories")
 def upsert_category(c: CategoryIn, x_admin_token: Optional[str] = Header(None)):
