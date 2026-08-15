@@ -96,7 +96,7 @@
   <section id="tab-products">
     <div class="toolbar">
       <input class="search" id="prodSearch" placeholder="Search products…">
-      <button class="btn" id="addProductBtn">+ Add Product</button>
+      <button class="btn ghost" id="bulkUploadBtn" style="margin-right:8px;">⬆ Bulk Upload</button><button class="btn" id="addProductBtn">+ Add Product</button>
     </div>
     <table>
       <thead><tr><th></th><th>Name</th><th>Category</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Sale</th><th class="r">Stock</th><th></th></tr></thead>
@@ -383,8 +383,92 @@ async function loadReports(){
   $('lowStock').innerHTML = r.low_stock.length? r.low_stock.map(p=>`<span style="display:inline-block; margin:0 8px 8px 0; font-size:12px; color:var(--gold);">${p.name} (${p.stock})</span>`).join('') : '<div class="empty">No low-stock items.</div>';
 }
 
+
+/* ---------- bulk upload ---------- */
+$('bulkUploadBtn').addEventListener('click',()=>{ $('bulk-err').textContent=''; $('bulk-result').textContent=''; $('bulk-text').value=''; $('bulk-file').value=''; $('bulkModal').classList.add('open'); });
+$('bulk-cancel').addEventListener('click',()=>$('bulkModal').classList.remove('open'));
+
+$('bulk-file').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{ $('bulk-text').value=reader.result; };
+  reader.readAsText(file);
+});
+
+function parseCSVLine(line){
+  // simple CSV parse handling quoted fields
+  const out=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){ inQ=!inQ; }
+    else if(ch===',' && !inQ){ out.push(cur); cur=''; }
+    else cur+=ch;
+  }
+  out.push(cur);
+  return out.map(s=>s.trim());
+}
+
+$('bulk-submit').addEventListener('click', async ()=>{
+  $('bulk-err').textContent=''; $('bulk-result').textContent='';
+  const text=$('bulk-text').value.trim();
+  if(!text){ $('bulk-err').textContent='Please upload a file or paste rows.'; return; }
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  // skip header row if it looks like one
+  let start=0;
+  if(lines[0] && /sku/i.test(lines[0]) && /name/i.test(lines[0])) start=1;
+  const products=[];
+  for(let i=start;i<lines.length;i++){
+    const c=parseCSVLine(lines[i]);
+    if(c.length<3) continue;
+    products.push({
+      sku:c[0], name:c[1], category:c[2],
+      cost_price:+(c[3]||0)||0, price:+(c[4]||0)||0, sale_price:+(c[5]||0)||0,
+      stock:+(c[6]||0)||0, description:c[7]||''
+    });
+  }
+  if(!products.length){ $('bulk-err').textContent='No valid rows found.'; return; }
+  const btn=$('bulk-submit'); btn.disabled=true; btn.textContent='Uploading…';
+  try{
+    const res=await fetch('/api/admin/products/bulk',{method:'POST',headers:H(),body:JSON.stringify({products})});
+    const data=await res.json();
+    if(!res.ok){ throw new Error(data.detail||'Upload failed.'); }
+    let msg=`✓ ${data.added} added, ${data.updated} updated.`;
+    if(data.errors && data.errors.length){ msg+=` ${data.errors.length} skipped.`; $('bulk-err').innerHTML=data.errors.slice(0,5).join('<br>'); }
+    $('bulk-result').textContent=msg;
+    await loadAll();
+  }catch(e){ $('bulk-err').textContent=e.message; }
+  btn.disabled=false; btn.textContent='Upload Products';
+});
+
 /* auto-login if token stored */
 if(TOKEN){ tryLogin(TOKEN).then(ok=>{ if(ok) showDash(); else sessionStorage.removeItem('ranishe_admin'); }); }
 </script>
+
+<!-- BULK UPLOAD MODAL -->
+<div class="modal-bg" id="bulkModal">
+  <div class="modal" style="width:min(640px,100%);">
+    <h2>Bulk Upload Products</h2>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:14px;">
+      Upload a CSV file (or paste rows below). Columns, in order:<br>
+      <strong>sku, name, category, cost_price, price, sale_price, stock, description</strong><br>
+      Existing SKUs are updated; new ones are added. Categories: Earrings, Chains, Bracelets, Gift Sets (products under ₹499 auto-appear in "Under ₹499").
+    </p>
+    <div class="field">
+      <label>Upload CSV file</label>
+      <input id="bulk-file" type="file" accept=".csv">
+    </div>
+    <div class="field">
+      <label>…or paste rows here (one product per line, comma-separated)</label>
+      <textarea id="bulk-text" style="min-height:120px; font-family:monospace; font-size:12px;" placeholder="RAH001,The Luma Hoops,Earrings,150,399,399,5,Elegant gold hoops"></textarea>
+    </div>
+    <div class="err" id="bulk-err"></div>
+    <div id="bulk-result" style="font-size:12.5px; color:var(--green); margin-bottom:10px;"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="bulk-cancel">Cancel</button>
+      <button class="btn" id="bulk-submit">Upload Products</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

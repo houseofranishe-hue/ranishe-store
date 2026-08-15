@@ -226,6 +226,48 @@ def upsert_product(p: ProductIn, x_admin_token: Optional[str] = Header(None)):
     conn.commit(); cur.close(); conn.close()
     return {"ok": True, "sku": p.sku}
 
+class BulkProduct(BaseModel):
+    sku: str
+    name: str
+    category: str
+    cost_price: int = 0
+    price: int = 0
+    sale_price: int = 0
+    stock: int = 0
+    description: str = ""
+
+class BulkUpload(BaseModel):
+    products: List[BulkProduct]
+
+@app.post("/api/admin/products/bulk")
+def bulk_upload(payload: BulkUpload, x_admin_token: Optional[str] = Header(None)):
+    require_admin(x_admin_token)
+    conn = get_conn(); cur = conn.cursor()
+    added = 0; updated = 0; errors = []
+    for i, p in enumerate(payload.products):
+        try:
+            if not p.sku or not p.name or not p.category:
+                errors.append(f"Row {i+1}: missing SKU, name, or category")
+                continue
+            # sale_price defaults to price if not given
+            sale = p.sale_price if p.sale_price > 0 else p.price
+            cur.execute(q("SELECT sku FROM products WHERE sku=%s"), (p.sku,))
+            if cur.fetchone():
+                cur.execute(q("""UPDATE products SET name=%s,category=%s,cost_price=%s,price=%s,sale_price=%s,
+                                 stock=%s,description=%s WHERE sku=%s"""),
+                            (p.name,p.category,p.cost_price,p.price,sale,p.stock,p.description,p.sku))
+                updated += 1
+            else:
+                cur.execute(q("""INSERT INTO products (sku,name,category,cost_price,price,sale_price,stock,image_url,description)
+                                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
+                            (p.sku,p.name,p.category,p.cost_price,p.price,sale,p.stock,"",p.description))
+                added += 1
+        except Exception as e:
+            errors.append(f"Row {i+1} ({p.sku}): {str(e)}")
+    conn.commit(); cur.close(); conn.close()
+    return {"ok": True, "added": added, "updated": updated, "errors": errors}
+
+
 
 @app.delete("/api/admin/products/{sku}")
 def delete_product(sku: str, x_admin_token: Optional[str] = Header(None)):
