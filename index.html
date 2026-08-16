@@ -572,7 +572,7 @@ function renderBrowse(){
     html += `<button class="collection-tile" data-cat="${cat}" style="${bg}">
       ${bg ? '' : `<span class="tile-icon">${cardSVG ? cardSVG(iconCat,0) : ''}</span>`}
       <span class="tile-overlay"></span>
-      <span class="tile-label">${cat}</span>
+      <span class="tile-label">${fixNums(cat)}</span>
     </button>`;
   });
   html += '</div>';
@@ -626,7 +626,7 @@ function showDetail(sku){
     ${gallery}
     <div class="detail-info">
       <div class="detail-cat">${p.category}</div>
-      <h2>${p.name}</h2>
+      <h2>${fixNums(p.name)}</h2>
       <div class="detail-price"><span>₹${p.sale_price}</span>${onSale?`<span class="was">₹${p.price}</span>`:''}</div>
       ${onSale?`<div class="detail-save">Save ${pct}%</div>`:''}
       ${stockLine}
@@ -657,13 +657,21 @@ function showBrowse(){
 }
 
 const PAGE_SIZE = 12;
+// Cormorant Garamond's hosted glyphs don't expose a lining-numeral alternate,
+// so any digits inside serif headings render unevenly. Route just the digits
+// through the sans-serif font instead, wherever a heading might contain them.
+function fixNums(text){
+  if(text==null) return '';
+  return String(text).replace(/\d+/g, m => `<span style="font-family:'Jost',sans-serif;">${m}</span>`);
+}
+
 function render(){
   let list = PRODUCTS.filter(p=>matchesCat(p, state.cat));
   list = applySort(list);
 
   // title + count
   const titleEl=document.getElementById('collectionTitle');
-  if(titleEl) titleEl.textContent = state.cat==='All' ? 'Shop All' : state.cat;
+  if(titleEl) titleEl.innerHTML = fixNums(state.cat==='All' ? 'Shop All' : state.cat);
   const countEl=document.getElementById('resultCount');
   if(countEl) countEl.textContent = list.length + (list.length===1?' piece':' pieces');
 
