@@ -561,7 +561,7 @@ async function loadOrders(){
       </div>
       <div style="font-size:12px; color:var(--muted); margin-top:8px; line-height:1.6;">
         ${new Date(o.created_at).toLocaleString('en-IN')}<br>
-        <strong>${o.customer_name}</strong> · ${o.phone}<br>${o.address}
+        <strong>${o.customer_name}</strong> · ${o.phone}<br>${o.address}${o.pincode?` — PIN ${o.pincode}`:''}
       </div>
       <table style="margin-top:10px;">${o.items.map(it=>`<tr><td>${it.name} × ${it.qty}</td><td class="r">₹${it.unit_price*it.qty}</td></tr>`).join('')}</table>
       <div style="text-align:right; font-weight:500; margin-top:8px;">Total ₹${o.total}</div>

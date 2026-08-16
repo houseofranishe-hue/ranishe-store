@@ -760,6 +760,7 @@ function renderDrawer(){
       <div class="form-field"><label>Full Name</label><input id="f-name" autocomplete="name"></div>
       <div class="form-field"><label>Phone (WhatsApp)</label><input id="f-phone" autocomplete="tel" inputmode="tel"></div>
       <div class="form-field"><label>Delivery Address</label><textarea id="f-address" autocomplete="street-address"></textarea></div>
+      <div class="form-field"><label>PIN Code</label><input id="f-pincode" autocomplete="postal-code" inputmode="numeric" maxlength="6" placeholder="6-digit PIN code"></div>
       <div class="err" id="f-err"></div>`;
     foot.innerHTML=`
       <div class="total-row" style="margin-bottom:6px;"><span>Subtotal</span><span>₹${cartSubtotal()}</span></div>
@@ -811,18 +812,20 @@ async function placeOrder(){
   const name=document.getElementById('f-name').value.trim();
   const phone=document.getElementById('f-phone').value.trim();
   const address=document.getElementById('f-address').value.trim();
+  const pincode=document.getElementById('f-pincode').value.trim();
   const err=document.getElementById('f-err');
   err.textContent='';
   if(name.length<2){ err.textContent='Please enter your name.'; return; }
   if(phone.replace(/\D/g,'').length<8){ err.textContent='Please enter a valid phone number.'; return; }
   if(address.length<10){ err.textContent='Please enter your full delivery address.'; return; }
+  if(!/^\d{6}$/.test(pincode)){ err.textContent='Please enter a valid 6-digit PIN code.'; return; }
 
   const items=Object.entries(CART).map(([sku,qty])=>({sku,qty}));
   const btn=document.getElementById('placeOrder'); btn.disabled=true; btn.textContent='Placing…';
   try{
     const res=await fetch('/api/orders',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({customer_name:name, phone, address, items})
+      body:JSON.stringify({customer_name:name, phone, address, pincode, items})
     });
     const data=await res.json();
     if(!res.ok){ throw new Error(data.detail || 'Something went wrong.'); }

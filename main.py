@@ -33,7 +33,7 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "change-me")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
@@ -82,7 +82,7 @@ def init_db():
             archived BOOLEAN DEFAULT FALSE, bundle_skus TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
-            phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
+            phone TEXT NOT NULL, address TEXT NOT NULL, pincode TEXT DEFAULT '', items_json TEXT NOT NULL,
             total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new',
             stock_deducted_json TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
@@ -91,6 +91,7 @@ def init_db():
         cur.execute("ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT ''")
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS bundle_skus TEXT DEFAULT ''")
         cur.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_deducted_json TEXT DEFAULT ''")
+        cur.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS pincode TEXT DEFAULT ''")
     else:
         cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0, image_url TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS products (
@@ -100,7 +101,7 @@ def init_db():
             archived INTEGER DEFAULT 0, bundle_skus TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
-            phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
+            phone TEXT NOT NULL, address TEXT NOT NULL, pincode TEXT DEFAULT '', items_json TEXT NOT NULL,
             total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new',
             stock_deducted_json TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
@@ -119,6 +120,8 @@ def init_db():
         ocols = [row[1] for row in cur.fetchall()]
         if "stock_deducted_json" not in ocols:
             cur.execute("ALTER TABLE orders ADD COLUMN stock_deducted_json TEXT DEFAULT ''")
+        if "pincode" not in ocols:
+            cur.execute("ALTER TABLE orders ADD COLUMN pincode TEXT DEFAULT ''")
 
     cur.execute("SELECT COUNT(*) AS c FROM products")
     row = cur.fetchone()
@@ -182,7 +185,16 @@ class OrderIn(BaseModel):
     customer_name: str = Field(min_length=2, max_length=100)
     phone: str = Field(min_length=8, max_length=15)
     address: str = Field(min_length=10, max_length=500)
+    pincode: str = Field(min_length=6, max_length=6)
     items: List[OrderItem]
+
+    @field_validator("pincode")
+    @classmethod
+    def pincode_must_be_six_digits(cls, v: str) -> str:
+        v = v.strip()
+        if not v.isdigit() or len(v) != 6:
+            raise ValueError("PIN code must be exactly 6 digits.")
+        return v
 
 
 # ------------------------------------------------------- storefront API
@@ -299,10 +311,10 @@ def create_order(order: OrderIn):
             cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (need, sku))
 
         order_id = "RAN-" + uuid.uuid4().hex[:8].upper()
-        cur.execute(q("""INSERT INTO orders (id,created_at,customer_name,phone,address,items_json,total,cost_total,stock_deducted_json)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
+        cur.execute(q("""INSERT INTO orders (id,created_at,customer_name,phone,address,pincode,items_json,total,cost_total,stock_deducted_json)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
                     (order_id, datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                     order.customer_name.strip(), order.phone.strip(), order.address.strip(),
+                     order.customer_name.strip(), order.phone.strip(), order.address.strip(), order.pincode,
                      json.dumps(detailed), total, cost_total, json.dumps(stock_need)))
         conn.commit()
     finally:
@@ -312,7 +324,7 @@ def create_order(order: OrderIn):
     send_notification_email(
         f"New order {order_id} — ₹{total}",
         f"New order on House of Ranishè!\n\nOrder ID: {order_id}\n"
-        f"Customer: {order.customer_name.strip()}\nPhone: {order.phone.strip()}\nAddress: {order.address.strip()}\n\n"
+        f"Customer: {order.customer_name.strip()}\nPhone: {order.phone.strip()}\nAddress: {order.address.strip()}\nPIN Code: {order.pincode}\n\n"
         f"Items:\n{item_lines}\n\nTotal: ₹{total}"
     )
     if newly_out_of_stock:
