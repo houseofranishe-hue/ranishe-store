@@ -86,19 +86,19 @@
   .announce{ text-align:center; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:11px 16px; color:var(--muted); border-bottom:1px solid var(--line); line-height:1.5; }
   @media (max-width:560px){ .announce{ font-size:9.5px; letter-spacing:0.06em; padding:9px 12px; } }
 
-  .offer-banner{ position:relative; overflow:hidden; background:var(--rani); border-bottom:1px solid rgba(0,0,0,0.1); }
+  .offer-banner{ position:relative; overflow:hidden; background:var(--gold-bright); border-bottom:1px solid rgba(0,0,0,0.1); }
   .offer-banner .marquee-track{
     display:flex; white-space:nowrap; width:max-content;
     animation:offer-scroll 18s linear infinite;
   }
   .offer-banner .marquee-item{
     display:inline-flex; align-items:center; padding:14px 40px;
-    font-family:'Jost', sans-serif; font-size:16px; font-weight:700; letter-spacing:0.08em;
-    text-transform:uppercase; color:#FFF6E9; text-shadow:0 1px 2px rgba(0,0,0,0.25);
+    font-family:'Jost', sans-serif; font-weight:600; font-size:16px; letter-spacing:0.18em;
+    text-transform:uppercase; color:var(--ink);
   }
   @keyframes offer-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
   @media (max-width:560px){
-    .offer-banner .marquee-item{ font-size:12.5px; padding:11px 26px; letter-spacing:0.05em; }
+    .offer-banner .marquee-item{ font-size:12px; padding:11px 26px; letter-spacing:0.1em; }
   }
   @media (prefers-reduced-motion: reduce){
     .offer-banner .marquee-track{ animation:none; }
