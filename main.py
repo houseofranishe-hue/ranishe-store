@@ -83,12 +83,14 @@ def init_db():
         cur.execute("""CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
             phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
-            total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new')""")
+            total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new',
+            stock_deducted_json TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS analytics_events (
             id SERIAL PRIMARY KEY, created_at TEXT NOT NULL, kind TEXT NOT NULL, sku TEXT)""")
         cur.execute("ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT ''")
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS bundle_skus TEXT DEFAULT ''")
+        cur.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stock_deducted_json TEXT DEFAULT ''")
     else:
         cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0, image_url TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS products (
@@ -99,7 +101,8 @@ def init_db():
         cur.execute("""CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
             phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
-            total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new')""")
+            total INTEGER NOT NULL, cost_total INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'new',
+            stock_deducted_json TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS analytics_events (
             id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, kind TEXT NOT NULL, sku TEXT)""")
@@ -112,6 +115,10 @@ def init_db():
         pcols = [row[1] for row in cur.fetchall()]
         if "bundle_skus" not in pcols:
             cur.execute("ALTER TABLE products ADD COLUMN bundle_skus TEXT DEFAULT ''")
+        cur.execute("PRAGMA table_info(orders)")
+        ocols = [row[1] for row in cur.fetchall()]
+        if "stock_deducted_json" not in ocols:
+            cur.execute("ALTER TABLE orders ADD COLUMN stock_deducted_json TEXT DEFAULT ''")
 
     cur.execute("SELECT COUNT(*) AS c FROM products")
     row = cur.fetchone()
@@ -292,11 +299,11 @@ def create_order(order: OrderIn):
             cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (need, sku))
 
         order_id = "RAN-" + uuid.uuid4().hex[:8].upper()
-        cur.execute(q("""INSERT INTO orders (id,created_at,customer_name,phone,address,items_json,total,cost_total)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""),
+        cur.execute(q("""INSERT INTO orders (id,created_at,customer_name,phone,address,items_json,total,cost_total,stock_deducted_json)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
                     (order_id, datetime.now(timezone.utc).isoformat(timespec="seconds"),
                      order.customer_name.strip(), order.phone.strip(), order.address.strip(),
-                     json.dumps(detailed), total, cost_total))
+                     json.dumps(detailed), total, cost_total, json.dumps(stock_need)))
         conn.commit()
     finally:
         cur.close(); conn.close()
@@ -535,13 +542,54 @@ def admin_orders(x_admin_token: Optional[str] = Header(None)):
 @app.post("/api/admin/orders/{order_id}/status")
 def order_status(order_id: str, request: Request, x_admin_token: Optional[str] = Header(None)):
     require_admin(x_admin_token)
-    status = request.query_params.get("status", "")
-    if status not in ("new","confirmed","shipped","delivered","cancelled"):
+    new_status = request.query_params.get("status", "")
+    if new_status not in ("new","confirmed","shipped","delivered","cancelled"):
         raise HTTPException(400, "Invalid status.")
+
     conn = get_conn(); cur = conn.cursor()
-    cur.execute(q("UPDATE orders SET status=%s WHERE id=%s"), (status, order_id))
+    cur.execute(q("SELECT status, items_json, stock_deducted_json FROM orders WHERE id=%s"), (order_id,))
+    row = cur.fetchone()
+    if row is None:
+        cur.close(); conn.close()
+        raise HTTPException(404, "Order not found.")
+    row = dict(row)
+    old_status = row["status"]
+
+    # figure out exactly what stock this order deducted (falls back to the
+    # plain item list for orders placed before this tracking existed)
+    raw = (row.get("stock_deducted_json") or "").strip()
+    if raw:
+        deducted = json.loads(raw)
+    else:
+        deducted = {}
+        for it in json.loads(row["items_json"] or "[]"):
+            deducted[it["sku"]] = deducted.get(it["sku"], 0) + it["qty"]
+
+    if old_status != "cancelled" and new_status == "cancelled":
+        # order is being cancelled — give every deducted unit back to stock
+        for sku, qty in deducted.items():
+            cur.execute(q("UPDATE products SET stock = stock + %s WHERE sku=%s"), (qty, sku))
+
+    elif old_status == "cancelled" and new_status != "cancelled":
+        # order is being un-cancelled — re-check stock is actually available before re-deducting
+        short = []
+        for sku, qty in deducted.items():
+            cur.execute(q("SELECT name, stock FROM products WHERE sku=%s"), (sku,))
+            p = cur.fetchone()
+            if p is None:
+                continue
+            p = dict(p)
+            if p["stock"] < qty:
+                short.append(f"{p['name']} (need {qty}, only {p['stock']} in stock)")
+        if short:
+            cur.close(); conn.close()
+            raise HTTPException(409, "Can't restore this order — not enough stock left for: " + "; ".join(short))
+        for sku, qty in deducted.items():
+            cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (qty, sku))
+
+    cur.execute(q("UPDATE orders SET status=%s WHERE id=%s"), (new_status, order_id))
     conn.commit(); cur.close(); conn.close()
-    return {"ok": True, "status": status}
+    return {"ok": True, "status": new_status}
 
 
 @app.get("/api/admin/reports")
