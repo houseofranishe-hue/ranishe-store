@@ -551,7 +551,16 @@ async function delCat(name){
 async function loadOrders(){
   const orders=await fetch('/api/admin/orders',{headers:H()}).then(r=>r.json());
   if(orders.length===0){ $('ordersBody').innerHTML='<div class="empty">No orders yet.</div>'; return; }
-  $('ordersBody').innerHTML = orders.map(o=>`
+  $('ordersBody').innerHTML = orders.map(o=>{
+    const savings = o.items.reduce((sum,it)=> sum + Math.max(0, ((it.mrp||it.unit_price)-it.unit_price) * it.qty), 0);
+    const itemRows = o.items.map(it=>{
+      const hasMrp = it.mrp && it.mrp > it.unit_price;
+      return `<tr>
+        <td>${it.name} × ${it.qty}</td>
+        <td class="r">${hasMrp?`<span style="text-decoration:line-through; color:var(--muted); margin-right:6px; font-size:11px;">₹${it.mrp*it.qty}</span>`:''}₹${it.unit_price*it.qty}</td>
+      </tr>`;
+    }).join('');
+    return `
     <div style="border:1px solid var(--line); background:var(--paper); padding:16px 18px; margin-bottom:14px;">
       <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
         <strong style="letter-spacing:0.05em;">${o.id}</strong>
@@ -563,12 +572,27 @@ async function loadOrders(){
         ${new Date(o.created_at).toLocaleString('en-IN')}<br>
         <strong>${o.customer_name}</strong> · ${o.phone}<br>${o.address}${o.pincode?` — PIN ${o.pincode}`:''}
       </div>
-      <table style="margin-top:10px;">${o.items.map(it=>`<tr><td>${it.name} × ${it.qty}</td><td class="r">₹${it.unit_price*it.qty}</td></tr>`).join('')}</table>
+      <table style="margin-top:10px;">${itemRows}</table>
       <div style="text-align:right; font-weight:500; margin-top:8px;">Total ₹${o.total}</div>
-    </div>`).join('');
+      ${savings>0?`
+        <div style="margin-top:12px; padding:10px 14px; background:var(--gold); color:var(--ink); border-radius:3px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span style="font-weight:600; font-size:13px;">🎉 Customer saved ₹${savings}</span>
+          <button type="button" class="btn sm ghost copy-caption" data-oid="${o.id}" data-savings="${savings}" style="background:rgba(255,255,255,0.5);">Copy Instagram Caption</button>
+        </div>`:''}
+    </div>`;
+  }).join('');
   $('ordersBody').querySelectorAll('.status-sel').forEach(s=>s.addEventListener('change', async ()=>{
     await fetch(`/api/admin/orders/${s.dataset.oid}/status?status=${s.value}`,{method:'POST',headers:H()});
     loadReports();
+  }));
+  $('ordersBody').querySelectorAll('.copy-caption').forEach(btn=>btn.addEventListener('click', async ()=>{
+    const order = orders.find(o=>o.id===btn.dataset.oid);
+    const itemNames = order.items.map(it=>it.name).join(', ');
+    const caption = `✨ Another House of Ranishè customer just saved ₹${btn.dataset.savings} on their order! ✨\n\n${itemNames}\n\nReal 18K gold-plated, anti-tarnish jewellery — real savings. 💛\n#HouseOfRanishe #GoldPlatedJewellery`;
+    try{
+      await navigator.clipboard.writeText(caption);
+      btn.textContent='Copied!'; setTimeout(()=>{ btn.textContent='Copy Instagram Caption'; }, 1800);
+    }catch(e){ alert(caption); }
   }));
 }
 

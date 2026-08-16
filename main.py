@@ -271,15 +271,16 @@ def create_order(order: OrderIn):
                 product_cache[sku] = dict(r) if r else None
             return product_cache[sku]
 
-        total = 0; cost_total = 0; detailed = []
+        total = 0; cost_total = 0; mrp_total = 0; detailed = []
         stock_need = {}  # sku -> total units to deduct from that sku's own stock
         for item in order.items:
             row = get_product(item.sku)
             if row is None:
                 raise HTTPException(400, f"Unknown product: {item.sku}")
             total += row["sale_price"] * item.qty
+            mrp_total += row["price"] * item.qty
             cost_total += row["cost_price"] * item.qty
-            detailed.append({"sku":row["sku"],"name":row["name"],"qty":item.qty,"unit_price":row["sale_price"]})
+            detailed.append({"sku":row["sku"],"name":row["name"],"qty":item.qty,"unit_price":row["sale_price"],"mrp":row["price"]})
 
             # the item purchased loses stock
             stock_need[item.sku] = stock_need.get(item.sku, 0) + item.qty
@@ -306,6 +307,7 @@ def create_order(order: OrderIn):
         subtotal = total
         shipping = 60 if (0 < subtotal < 999) else 0
         total = subtotal + shipping
+        total_savings = max(0, mrp_total - subtotal)
 
         for sku, need in stock_need.items():
             cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (need, sku))
@@ -321,11 +323,12 @@ def create_order(order: OrderIn):
         cur.close(); conn.close()
 
     item_lines = "\n".join(f"  • {d['name']} × {d['qty']} — ₹{d['unit_price']*d['qty']}" for d in detailed)
+    savings_line = f"\nCustomer saved: ₹{total_savings}" if total_savings > 0 else ""
     send_notification_email(
         f"New order {order_id} — ₹{total}",
         f"New order on House of Ranishè!\n\nOrder ID: {order_id}\n"
         f"Customer: {order.customer_name.strip()}\nPhone: {order.phone.strip()}\nAddress: {order.address.strip()}\nPIN Code: {order.pincode}\n\n"
-        f"Items:\n{item_lines}\n\nTotal: ₹{total}"
+        f"Items:\n{item_lines}\n\nTotal: ₹{total}{savings_line}"
     )
     if newly_out_of_stock:
         send_notification_email(
@@ -334,7 +337,8 @@ def create_order(order: OrderIn):
             + "\n".join(f"  • {n}" for n in newly_out_of_stock)
         )
 
-    return {"order_id": order_id, "total": total, "subtotal": subtotal, "shipping": shipping, "items": detailed}
+    return {"order_id": order_id, "total": total, "subtotal": subtotal, "shipping": shipping,
+            "items": detailed, "total_savings": total_savings}
 
 
 # ------------------------------------------------------- admin: products

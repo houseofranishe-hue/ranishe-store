@@ -662,7 +662,13 @@ const PAGE_SIZE = 12;
 // through the sans-serif font instead, wherever a heading might contain them.
 function fixNums(text){
   if(text==null) return '';
-  return String(text).replace(/\d+/g, m => `<span style="font-family:'Jost',sans-serif;">${m}</span>`);
+  const str = String(text);
+  // "Under 499" style category labels should read as a price threshold — add the rupee sign.
+  const underMatch = str.match(/^(Under\s+)₹?(\d+)$/i);
+  if(underMatch){
+    return `${underMatch[1]}₹<span style="font-family:'Jost',sans-serif;">${underMatch[2]}</span>`;
+  }
+  return str.replace(/\d+/g, m => `<span style="font-family:'Jost',sans-serif;">${m}</span>`);
 }
 
 function render(){
@@ -742,9 +748,11 @@ function renderDrawer(){
     title.textContent='Order Placed';
     const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(STORE_NAME)}&am=${LAST_ORDER.total}&cu=INR&tn=${LAST_ORDER.order_id}`;
     const waMsg = encodeURIComponent(`Hi! I placed order ${LAST_ORDER.order_id} (₹${LAST_ORDER.total}). Sharing payment screenshot here.`);
+    const savings = LAST_ORDER.total_savings || 0;
     body.innerHTML=`<div class="confirm-box">
       <div style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink);">Thank You</div>
       <div class="oid">${LAST_ORDER.order_id}</div>
+      ${savings>0?`<div style="margin:10px auto 4px; padding:10px 16px; background:var(--gold); color:var(--ink); font-family:'Jost',sans-serif; font-weight:600; font-size:13px; letter-spacing:0.04em; border-radius:2px; display:inline-block;">🎉 You saved ₹${savings} on this order!</div>`:''}
       <p>Your order is saved. To complete it, pay <strong>₹${LAST_ORDER.total}</strong> by UPI and confirm on WhatsApp with your order number.</p>
       <a class="pay-btn" href="${upiLink}">Pay ₹${LAST_ORDER.total} via UPI</a>
       <a class="pay-btn alt" href="https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}" target="_blank" rel="noopener">Confirm on WhatsApp</a>
