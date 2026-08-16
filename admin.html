@@ -174,6 +174,20 @@
       <div id="s-result" style="font-size:12.5px; color:var(--green); margin-bottom:10px;"></div>
       <button class="btn" id="s-save">Save Banner</button>
     </div>
+    <div class="rsection">
+      <h3>Order &amp; Stock Alerts</h3>
+      <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin:0 0 14px;">
+        Get an email the moment a new order comes in, and whenever a product's stock hits zero. Enter the email address that should receive these below.
+        <br><strong>Note:</strong> this also needs a mail-sending account (SMTP) set up once in Render's environment variables — ask your developer to add <code>SMTP_HOST</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code> (e.g. a Gmail app password). Without that, alerts are simply skipped.
+      </p>
+      <div class="field">
+        <label>Alert Email Address</label>
+        <input id="s-notify-email" type="email" placeholder="you@example.com">
+      </div>
+      <div class="err" id="s-notify-err"></div>
+      <div id="s-notify-result" style="font-size:12.5px; color:var(--green); margin-bottom:10px;"></div>
+      <button class="btn" id="s-notify-save">Save Alert Email</button>
+    </div>
   </section>
 </div>
 
@@ -196,6 +210,11 @@
     </div>
     <div class="field"><label>Photos (you can select up to 4 — first is the main image)</label><input id="m-photo" type="file" accept="image/*" multiple><div id="m-preview-row" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div></div>
     <div class="field"><label>Description</label><textarea id="m-desc"></textarea></div>
+    <div class="field">
+      <label>Gift Set Components <span style="text-transform:none; font-weight:400;">(optional — pick the existing products this set is bundled from. Selling one unit of this product will also deduct one unit from each product ticked below.)</span></label>
+      <input class="search" id="m-bundle-search" placeholder="Search products to add as components…" style="width:100%; margin-bottom:8px;">
+      <div id="m-bundle-list" style="max-height:180px; overflow-y:auto; border:1px solid var(--line); background:var(--paper); padding:8px 10px;"></div>
+    </div>
     <div class="err" id="m-err"></div>
     <div class="modal-actions">
       <button class="btn ghost" id="m-cancel">Cancel</button>
@@ -339,7 +358,7 @@ function renderProducts(){
     <tr>
       <td><input type="checkbox" class="row-check" data-sku="${p.sku}"></td>
       <td>${p.image_url?`<img class="thumb" src="${p.image_url.split(' ||| ')[0]}">`:'<div class="thumb"></div>'}</td>
-      <td>${p.name}<br><span style="color:var(--muted); font-size:10.5px;">${p.sku}</span></td>
+      <td>${p.name}${p.bundle_skus?` <span style="display:inline-block; font-size:9px; letter-spacing:0.06em; text-transform:uppercase; color:var(--green); border:1px solid var(--green); border-radius:3px; padding:1px 5px; vertical-align:middle;">Set</span>`:''}<br><span style="color:var(--muted); font-size:10.5px;">${p.sku}</span></td>
       <td>${p.category}</td>
       <td class="r">₹${p.cost_price}</td>
       <td class="r">₹${p.price}</td>
@@ -370,6 +389,24 @@ function fillCatSelect(){
 }
 
 let editingSku = null, photoData = '';
+let selectedBundleSkus = [];
+function renderBundleList(filter){
+  const term = (filter||'').toLowerCase();
+  const list = PRODUCTS.filter(p=>p.sku!==editingSku && (p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)));
+  const host = $('m-bundle-list');
+  if(!list.length){ host.innerHTML = '<div class="empty" style="padding:4px 0;">No matching products.</div>'; return; }
+  host.innerHTML = list.map(p=>`
+    <label style="display:flex; align-items:center; gap:8px; padding:5px 0; font-size:12.5px; cursor:pointer;">
+      <input type="checkbox" class="bundle-check" value="${p.sku}" ${selectedBundleSkus.includes(p.sku)?'checked':''} style="width:auto;">
+      ${p.name} <span style="color:var(--muted); font-size:10.5px;">(${p.sku} · ${p.category})</span>
+    </label>`).join('');
+  host.querySelectorAll('.bundle-check').forEach(cb=>cb.addEventListener('change', ()=>{
+    if(cb.checked){ if(!selectedBundleSkus.includes(cb.value)) selectedBundleSkus.push(cb.value); }
+    else { selectedBundleSkus = selectedBundleSkus.filter(s=>s!==cb.value); }
+  }));
+}
+$('m-bundle-search').addEventListener('input', e=>renderBundleList(e.target.value));
+
 function openProduct(sku){
   const p = sku ? PRODUCTS.find(x=>x.sku===sku) : null;
   editingSku = sku; photoList = p && p.image_url ? p.image_url.split(' ||| ').filter(Boolean) : [];
@@ -380,6 +417,8 @@ function openProduct(sku){
   $('m-desc').value=p?(p.description||''):'';
   fillCatSelect(); if(p) $('m-cat').value=p.category;
   renderPhotoPreviews();
+  selectedBundleSkus = (p && p.bundle_skus) ? p.bundle_skus.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  $('m-bundle-search').value=''; renderBundleList('');
   $('m-err').textContent=''; $('prodModal').classList.add('open');
 }
 $('addProductBtn').addEventListener('click',()=>openProduct(null));
@@ -441,7 +480,8 @@ $('m-save').addEventListener('click', async ()=>{
   const body={
     sku:$('m-sku').value.trim(), name:$('m-name').value.trim(), category:$('m-cat').value,
     cost_price:+$('m-cost').value||0, price:+$('m-price').value||0, sale_price:+$('m-sale').value||0,
-    stock:+$('m-stock').value||0, image_url:photoList.join(' ||| '), description:$('m-desc').value.trim()
+    stock:+$('m-stock').value||0, image_url:photoList.join(' ||| '), description:$('m-desc').value.trim(),
+    bundle_skus: selectedBundleSkus.join(',')
   };
   if(!body.sku||!body.name){ $('m-err').textContent='Name and SKU are required.'; return; }
   const res=await fetch('/api/admin/products',{method:'POST',headers:H(),body:JSON.stringify(body)});
@@ -574,23 +614,43 @@ async function loadReports(){
   $('topViewed').innerHTML = a.top_viewed.length? a.top_viewed.map(v=>`<tr><td>${v.name}</td><td class="r">${v.views}</td></tr>`).join('') : '<tr><td colspan="2" class="empty">No product views yet.</td></tr>';
 }
 
-/* ---------- settings (offer banner) ---------- */
+/* ---------- settings (offer banner + notifications) ---------- */
 async function loadSettings(){
   $('s-err').textContent=''; $('s-result').textContent='';
+  $('s-notify-err').textContent=''; $('s-notify-result').textContent='';
   const s=await fetch('/api/admin/settings',{headers:H()}).then(x=>x.json());
   $('s-banner-text').value = s.banner_text||'';
   $('s-banner-enabled').checked = !!s.banner_enabled;
+  $('s-notify-email').value = s.notify_email||'';
+}
+async function saveSettings(overrides){
+  const current = {
+    banner_text: $('s-banner-text').value.trim(),
+    banner_enabled: $('s-banner-enabled').checked,
+    notify_email: $('s-notify-email').value.trim(),
+  };
+  const body = Object.assign(current, overrides||{});
+  return fetch('/api/admin/settings',{method:'POST',headers:H(),body:JSON.stringify(body)});
 }
 $('s-save').addEventListener('click', async ()=>{
   $('s-err').textContent=''; $('s-result').textContent='';
-  const body={ banner_text:$('s-banner-text').value.trim(), banner_enabled:$('s-banner-enabled').checked };
   const btn=$('s-save'); btn.disabled=true; btn.textContent='Saving…';
   try{
-    const res=await fetch('/api/admin/settings',{method:'POST',headers:H(),body:JSON.stringify(body)});
+    const res=await saveSettings();
     if(!res.ok) throw new Error('Could not save.');
     $('s-result').textContent='✓ Banner saved.';
   }catch(e){ $('s-err').textContent=e.message; }
   btn.disabled=false; btn.textContent='Save Banner';
+});
+$('s-notify-save').addEventListener('click', async ()=>{
+  $('s-notify-err').textContent=''; $('s-notify-result').textContent='';
+  const btn=$('s-notify-save'); btn.disabled=true; btn.textContent='Saving…';
+  try{
+    const res=await saveSettings();
+    if(!res.ok) throw new Error('Could not save.');
+    $('s-notify-result').textContent='✓ Alert email saved.';
+  }catch(e){ $('s-notify-err').textContent=e.message; }
+  btn.disabled=false; btn.textContent='Save Alert Email';
 });
 
 

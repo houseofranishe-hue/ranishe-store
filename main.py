@@ -12,11 +12,22 @@ Env vars to set in Render:
   ADMIN_TOKEN    -> your secret admin password
   UPI_ID         -> your UPI id shown to customers
   WHATSAPP       -> your WhatsApp number, e.g. 919167629547
+
+Optional — email alerts for new orders / sold-out products
+(leave unset and alerts are simply skipped; nothing else breaks):
+  SMTP_HOST      -> e.g. smtp.gmail.com
+  SMTP_PORT      -> e.g. 587 (default)
+  SMTP_USER      -> the mailbox that sends the alert
+  SMTP_PASS      -> an app password for that mailbox
+  SMTP_FROM      -> optional, defaults to SMTP_USER
+  (the address that RECEIVES alerts is set from the admin Settings tab)
 """
 
 import os
 import json
 import uuid
+import smtplib
+from email.mime.text import MIMEText
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -31,6 +42,12 @@ PUBLIC_CONFIG = {
     "whatsapp": os.environ.get("WHATSAPP", "919167629547"),
     "store_name": "House of Ranishe",
 }
+
+SMTP_HOST = os.environ.get("SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587") or 587)
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+SMTP_FROM = os.environ.get("SMTP_FROM", "") or SMTP_USER
 
 USING_PG = DATABASE_URL.startswith("postgres")
 
@@ -62,7 +79,7 @@ def init_db():
             sku TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL,
             cost_price INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL, sale_price INTEGER NOT NULL,
             stock INTEGER NOT NULL DEFAULT 0, image_url TEXT DEFAULT '', description TEXT DEFAULT '',
-            archived BOOLEAN DEFAULT FALSE)""")
+            archived BOOLEAN DEFAULT FALSE, bundle_skus TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
             phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
@@ -71,13 +88,14 @@ def init_db():
         cur.execute("""CREATE TABLE IF NOT EXISTS analytics_events (
             id SERIAL PRIMARY KEY, created_at TEXT NOT NULL, kind TEXT NOT NULL, sku TEXT)""")
         cur.execute("ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT ''")
+        cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS bundle_skus TEXT DEFAULT ''")
     else:
         cur.execute("""CREATE TABLE IF NOT EXISTS categories (name TEXT PRIMARY KEY, sort_order INTEGER DEFAULT 0, image_url TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS products (
             sku TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL,
             cost_price INTEGER NOT NULL DEFAULT 0, price INTEGER NOT NULL, sale_price INTEGER NOT NULL,
             stock INTEGER NOT NULL DEFAULT 0, image_url TEXT DEFAULT '', description TEXT DEFAULT '',
-            archived INTEGER DEFAULT 0)""")
+            archived INTEGER DEFAULT 0, bundle_skus TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_name TEXT NOT NULL,
             phone TEXT NOT NULL, address TEXT NOT NULL, items_json TEXT NOT NULL,
@@ -85,11 +103,15 @@ def init_db():
         cur.execute("""CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT DEFAULT '')""")
         cur.execute("""CREATE TABLE IF NOT EXISTS analytics_events (
             id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, kind TEXT NOT NULL, sku TEXT)""")
-        # migrate older sqlite DBs created before image_url existed on categories
+        # migrate older sqlite DBs created before these columns existed
         cur.execute("PRAGMA table_info(categories)")
         cols = [row[1] for row in cur.fetchall()]
         if "image_url" not in cols:
             cur.execute("ALTER TABLE categories ADD COLUMN image_url TEXT DEFAULT ''")
+        cur.execute("PRAGMA table_info(products)")
+        pcols = [row[1] for row in cur.fetchall()]
+        if "bundle_skus" not in pcols:
+            cur.execute("ALTER TABLE products ADD COLUMN bundle_skus TEXT DEFAULT ''")
 
     cur.execute("SELECT COUNT(*) AS c FROM products")
     row = cur.fetchone()
@@ -129,6 +151,7 @@ class ProductIn(BaseModel):
     stock: int = Field(ge=0)
     image_url: str = ""
     description: str = ""
+    bundle_skus: str = ""  # comma-separated SKUs of the component products, for gift sets built from existing stock
 
 
 class CategoryIn(BaseModel):
@@ -140,6 +163,7 @@ class CategoryIn(BaseModel):
 class SettingsIn(BaseModel):
     banner_text: str = ""
     banner_enabled: bool = False
+    notify_email: str = ""
 
 
 class OrderItem(BaseModel):
@@ -163,6 +187,26 @@ def get_setting(key: str, default: str = "") -> str:
         return default
     row = dict(row)
     return row["value"] if row["value"] is not None else default
+
+
+def send_notification_email(subject: str, body: str):
+    """Best-effort alert email to the owner. Silently does nothing if SMTP env
+    vars or a recipient address aren't configured, and never raises — a failed
+    notification must never break checkout or stock updates."""
+    to_addr = get_setting("notify_email", "").strip()
+    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and to_addr):
+        return
+    try:
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = SMTP_FROM
+        msg["To"] = to_addr
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.sendmail(SMTP_FROM, [to_addr], msg.as_string())
+    except Exception:
+        pass
 
 
 @app.get("/api/config")
@@ -189,7 +233,7 @@ def list_products():
     rows = cur.fetchall(); cur.close(); conn.close()
     out = []
     for r in rows:
-        d = dict(r); d.pop("cost_price", None); d.pop("archived", None); out.append(d)
+        d = dict(r); d.pop("cost_price", None); d.pop("archived", None); d.pop("bundle_skus", None); out.append(d)
     return out
 
 
@@ -199,24 +243,54 @@ def create_order(order: OrderIn):
         raise HTTPException(400, "Cart is empty.")
     conn = get_conn(); cur = conn.cursor()
     try:
+        product_cache = {}
+
+        def get_product(sku):
+            if sku not in product_cache:
+                cur.execute(q("SELECT * FROM products WHERE sku=%s"), (sku,))
+                r = cur.fetchone()
+                product_cache[sku] = dict(r) if r else None
+            return product_cache[sku]
+
         total = 0; cost_total = 0; detailed = []
+        stock_need = {}  # sku -> total units to deduct from that sku's own stock
         for item in order.items:
-            cur.execute(q("SELECT * FROM products WHERE sku=%s"), (item.sku,))
-            row = cur.fetchone()
+            row = get_product(item.sku)
             if row is None:
                 raise HTTPException(400, f"Unknown product: {item.sku}")
-            row = dict(row)
-            if row["stock"] < item.qty:
-                raise HTTPException(409, f"Only {row['stock']} left of {row['name']} — please adjust your cart.")
             total += row["sale_price"] * item.qty
             cost_total += row["cost_price"] * item.qty
             detailed.append({"sku":row["sku"],"name":row["name"],"qty":item.qty,"unit_price":row["sale_price"]})
+
+            # the item purchased loses stock
+            stock_need[item.sku] = stock_need.get(item.sku, 0) + item.qty
+
+            # a gift set built from other products' SKUs also draws down each
+            # component's own stock, so the underlying pieces stay accurate
+            bundle = (row.get("bundle_skus") or "").strip()
+            if bundle:
+                for comp_sku in [s.strip() for s in bundle.split(",") if s.strip() and s.strip() != item.sku]:
+                    stock_need[comp_sku] = stock_need.get(comp_sku, 0) + item.qty
+
+        # validate combined stock requirement (direct purchases + gift-set components together)
+        newly_out_of_stock = []
+        for sku, need in stock_need.items():
+            row = get_product(sku)
+            if row is None:
+                raise HTTPException(400, f"A component product ({sku}) used in a gift set no longer exists.")
+            if row["stock"] < need:
+                raise HTTPException(409, f"Only {row['stock']} left of {row['name']} — please adjust your cart.")
+            if row["stock"] - need <= 0:
+                newly_out_of_stock.append(row["name"])
+
         # delivery charge: Rs 60 for orders below Rs 999, free otherwise
         subtotal = total
         shipping = 60 if (0 < subtotal < 999) else 0
         total = subtotal + shipping
-        for item in order.items:
-            cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (item.qty, item.sku))
+
+        for sku, need in stock_need.items():
+            cur.execute(q("UPDATE products SET stock = stock - %s WHERE sku=%s"), (need, sku))
+
         order_id = "RAN-" + uuid.uuid4().hex[:8].upper()
         cur.execute(q("""INSERT INTO orders (id,created_at,customer_name,phone,address,items_json,total,cost_total)
                          VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""),
@@ -226,6 +300,21 @@ def create_order(order: OrderIn):
         conn.commit()
     finally:
         cur.close(); conn.close()
+
+    item_lines = "\n".join(f"  • {d['name']} × {d['qty']} — ₹{d['unit_price']*d['qty']}" for d in detailed)
+    send_notification_email(
+        f"New order {order_id} — ₹{total}",
+        f"New order on House of Ranishè!\n\nOrder ID: {order_id}\n"
+        f"Customer: {order.customer_name.strip()}\nPhone: {order.phone.strip()}\nAddress: {order.address.strip()}\n\n"
+        f"Items:\n{item_lines}\n\nTotal: ₹{total}"
+    )
+    if newly_out_of_stock:
+        send_notification_email(
+            f"Out of stock: {', '.join(newly_out_of_stock)}",
+            "The following product(s) just sold out completely after this order:\n\n"
+            + "\n".join(f"  • {n}" for n in newly_out_of_stock)
+        )
+
     return {"order_id": order_id, "total": total, "subtotal": subtotal, "shipping": shipping, "items": detailed}
 
 
@@ -248,12 +337,12 @@ def upsert_product(p: ProductIn, x_admin_token: Optional[str] = Header(None)):
     exists = cur.fetchone()
     if exists:
         cur.execute(q("""UPDATE products SET name=%s,category=%s,cost_price=%s,price=%s,sale_price=%s,
-                         stock=%s,image_url=%s,description=%s WHERE sku=%s"""),
-                    (p.name,p.category,p.cost_price,p.price,p.sale_price,p.stock,p.image_url,p.description,p.sku))
+                         stock=%s,image_url=%s,description=%s,bundle_skus=%s WHERE sku=%s"""),
+                    (p.name,p.category,p.cost_price,p.price,p.sale_price,p.stock,p.image_url,p.description,p.bundle_skus,p.sku))
     else:
-        cur.execute(q("""INSERT INTO products (sku,name,category,cost_price,price,sale_price,stock,image_url,description)
-                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
-                    (p.sku,p.name,p.category,p.cost_price,p.price,p.sale_price,p.stock,p.image_url,p.description))
+        cur.execute(q("""INSERT INTO products (sku,name,category,cost_price,price,sale_price,stock,image_url,description,bundle_skus)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
+                    (p.sku,p.name,p.category,p.cost_price,p.price,p.sale_price,p.stock,p.image_url,p.description,p.bundle_skus))
     conn.commit(); cur.close(); conn.close()
     return {"ok": True, "sku": p.sku}
 
@@ -358,13 +447,14 @@ def delete_category(name: str, x_admin_token: Optional[str] = Header(None)):
     return {"ok": True}
 
 
-# ------------------------------------------------------- admin: settings (offer banner, etc.)
+# ------------------------------------------------------- admin: settings (offer banner, notifications)
 @app.get("/api/admin/settings")
 def get_settings(x_admin_token: Optional[str] = Header(None)):
     require_admin(x_admin_token)
     return {
         "banner_text": get_setting("banner_text", ""),
         "banner_enabled": get_setting("banner_enabled", "false") == "true",
+        "notify_email": get_setting("notify_email", ""),
     }
 
 
@@ -372,7 +462,12 @@ def get_settings(x_admin_token: Optional[str] = Header(None)):
 def save_settings(s: SettingsIn, x_admin_token: Optional[str] = Header(None)):
     require_admin(x_admin_token)
     conn = get_conn(); cur = conn.cursor()
-    for key, val in (("banner_text", s.banner_text), ("banner_enabled", "true" if s.banner_enabled else "false")):
+    pairs = (
+        ("banner_text", s.banner_text),
+        ("banner_enabled", "true" if s.banner_enabled else "false"),
+        ("notify_email", s.notify_email.strip()),
+    )
+    for key, val in pairs:
         if USING_PG:
             cur.execute("""INSERT INTO settings (key,value) VALUES (%s,%s)
                            ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value""", (key, val))

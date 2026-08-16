@@ -86,8 +86,23 @@
   .announce{ text-align:center; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:11px 16px; color:var(--muted); border-bottom:1px solid var(--line); line-height:1.5; }
   @media (max-width:560px){ .announce{ font-size:9.5px; letter-spacing:0.06em; padding:9px 12px; } }
 
-  .offer-banner{ text-align:center; font-family:'Jost', sans-serif; font-size:12px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; padding:11px 16px; color:#fff; background:var(--rani); line-height:1.5; }
-  @media (max-width:560px){ .offer-banner{ font-size:10px; letter-spacing:0.03em; padding:9px 12px; } }
+  .offer-banner{ position:relative; overflow:hidden; background:var(--rani); border-bottom:1px solid rgba(0,0,0,0.1); }
+  .offer-banner .marquee-track{
+    display:flex; white-space:nowrap; width:max-content;
+    animation:offer-scroll 18s linear infinite;
+  }
+  .offer-banner .marquee-item{
+    display:inline-flex; align-items:center; padding:14px 40px;
+    font-family:'Jost', sans-serif; font-size:16px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:#FFF6E9; text-shadow:0 1px 2px rgba(0,0,0,0.25);
+  }
+  @keyframes offer-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  @media (max-width:560px){
+    .offer-banner .marquee-item{ font-size:12.5px; padding:11px 26px; letter-spacing:0.05em; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .offer-banner .marquee-track{ animation:none; }
+  }
 
   header{ position:sticky; top:0; z-index:40; background:rgba(247,243,236,0.95); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
   nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:80px; }
@@ -118,6 +133,7 @@
   .section-head{ text-align:center; margin-bottom:30px; }
   .section-head .eyebrow{ font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
   .section-head h2{ font-size:clamp(24px,3.2vw,38px); text-transform:uppercase; }
+  #faq .section-head h2{ font-family:'Jost', sans-serif; font-weight:400; letter-spacing:0.03em; }
 
   .toolbar{ display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:34px; flex-wrap:wrap; gap:12px; }
   .toolbar-links{ display:flex; gap:22px; flex-wrap:wrap; }
@@ -244,12 +260,11 @@
   }
   .collection-tile .tile-icon{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0.5; }
   .collection-tile .tile-overlay{ position:absolute; inset:0; background:linear-gradient(to top, rgba(42,26,20,0.55), rgba(42,26,20,0.05) 55%, transparent); }
-  .collection-tile .tile-label{ white-space:nowrap;
+  .collection-tile .tile-label{
     position:relative; z-index:2; color:#fff; text-align:left; padding:14px;
     font-family:'Cormorant Garamond', serif; font-size:20px; line-height:1.1; letter-spacing:0.02em;
-    display:flex; flex-direction:column; gap:2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block;
   }
-  .collection-tile .tile-count{ font-family:'Jost', sans-serif; font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.9; font-weight:400; }
   .collection-tile:hover .tile-overlay{ background:linear-gradient(to top, rgba(42,26,20,0.65), rgba(42,26,20,0.1) 55%, transparent); }
 
   .grid-head{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:30px; border-bottom:1px solid var(--line); }
@@ -298,7 +313,9 @@
 </head>
 <body>
 
-<div class="offer-banner" id="offerBanner" style="display:none;"></div>
+<div class="offer-banner" id="offerBanner" style="display:none;">
+  <div class="marquee-track" id="offerBannerTrack"></div>
+</div>
 <div class="announce">Water-Resistant · Anti-Tarnish · Stainless Steel · 18K Gold Plated</div>
 
 <header>
@@ -445,8 +462,15 @@ async function loadConfig(){
     STORE_NAME = cfg.store_name || STORE_NAME;
     const banner = document.getElementById('offerBanner');
     if(banner){
-      if(cfg.banner_enabled && cfg.banner_text){ banner.textContent = cfg.banner_text; banner.style.display = 'block'; }
-      else { banner.style.display = 'none'; }
+      if(cfg.banner_enabled && cfg.banner_text){
+        const track = document.getElementById('offerBannerTrack');
+        // Repeat the message several times so the looping marquee never shows a gap.
+        const itemHTML = `<span class="marquee-item">${cfg.banner_text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`;
+        track.innerHTML = itemHTML.repeat(8);
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
     }
   }catch(e){}
   try{
@@ -548,7 +572,7 @@ function renderBrowse(){
     html += `<button class="collection-tile" data-cat="${cat}" style="${bg}">
       ${bg ? '' : `<span class="tile-icon">${cardSVG ? cardSVG(iconCat,0) : ''}</span>`}
       <span class="tile-overlay"></span>
-      <span class="tile-label">${cat}<span class="tile-count">${items.length} pieces</span></span>
+      <span class="tile-label">${cat}</span>
     </button>`;
   });
   html += '</div>';
