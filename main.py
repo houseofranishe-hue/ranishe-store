@@ -26,13 +26,15 @@ Optional — email alerts for new orders / sold-out products
 import os
 import json
 import uuid
+import base64
+import hashlib
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException, Header, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field, field_validator
 
 ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "change-me")
@@ -55,7 +57,10 @@ if USING_PG:
     import psycopg2
     import psycopg2.extras
     def get_conn():
-        return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+        # connect_timeout is essential: without it, a request just hangs
+        # forever (never errors) if the database host is unreachable,
+        # which looks exactly like the site "never finishing" to a visitor.
+        return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor, connect_timeout=10)
 else:
     import sqlite3
     DB_PATH = os.environ.get("DB_PATH", "store.db")
@@ -228,6 +233,86 @@ def send_notification_email(subject: str, body: str):
         pass
 
 
+
+# In-memory cache so the database is only ever hit ONCE per photo, the first
+# time anyone requests it after a deploy — not once per visitor. Keyed by a
+# short hash of the actual stored data, so it self-invalidates the instant an
+# admin uploads a different photo for that product/category.
+_IMAGE_MEM_CACHE: dict = {}
+
+
+def _decoded(data_url: str):
+    """Decode a stored 'data:<mime>;base64,<data>' string once, caching the
+    result in memory by its own content hash so repeat requests — from any
+    visitor — never touch the database or re-run the decode again."""
+    if not data_url or not data_url.startswith("data:"):
+        return None
+    cache_key = hashlib.sha256(data_url.encode()).hexdigest()
+    hit = _IMAGE_MEM_CACHE.get(cache_key)
+    if hit is not None:
+        return hit
+    try:
+        header, b64data = data_url.split(",", 1)
+        mime = header.split(";")[0][5:] or "image/jpeg"
+        raw = base64.b64decode(b64data)
+    except Exception:
+        return None
+    etag = hashlib.sha256(raw).hexdigest()[:16]
+    result = (mime, raw, etag)
+    _IMAGE_MEM_CACHE[cache_key] = result
+    return result
+
+
+def _serve_data_url(data_url: str, request: Request) -> Response:
+    decoded = _decoded(data_url)
+    if decoded is None:
+        raise HTTPException(404, "Image not found.")
+    mime, raw, etag = decoded
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304)
+    return Response(
+        content=raw,
+        media_type=mime,
+        headers={"Cache-Control": "public, max-age=604800", "ETag": etag},  # 1 week, then revalidate
+    )
+
+
+# Small caches so repeated image requests skip the database lookup entirely
+# after the first time each product/category is looked up in this process.
+_PRODUCT_PHOTOS_CACHE: dict = {}
+_CATEGORY_PHOTO_CACHE: dict = {}
+
+
+@app.get("/api/images/{sku}/{idx}")
+def product_image(sku: str, idx: int, request: Request):
+    photos = _PRODUCT_PHOTOS_CACHE.get(sku)
+    if photos is None:
+        conn = get_conn(); cur = conn.cursor()
+        cur.execute(q("SELECT image_url FROM products WHERE sku=%s"), (sku,))
+        row = cur.fetchone(); cur.close(); conn.close()
+        if row is None:
+            raise HTTPException(404, "Product not found.")
+        photos = [p for p in (dict(row)["image_url"] or "").split(" ||| ") if p]
+        _PRODUCT_PHOTOS_CACHE[sku] = photos
+    if idx < 0 or idx >= len(photos):
+        raise HTTPException(404, "Image not found.")
+    return _serve_data_url(photos[idx], request)
+
+
+@app.get("/api/category-images/{name}")
+def category_image(name: str, request: Request):
+    data_url = _CATEGORY_PHOTO_CACHE.get(name)
+    if data_url is None:
+        conn = get_conn(); cur = conn.cursor()
+        cur.execute(q("SELECT image_url FROM categories WHERE name=%s"), (name,))
+        row = cur.fetchone(); cur.close(); conn.close()
+        if row is None:
+            raise HTTPException(404, "Category not found.")
+        data_url = dict(row)["image_url"] or ""
+        _CATEGORY_PHOTO_CACHE[name] = data_url
+    return _serve_data_url(data_url, request)
+
+
 @app.get("/api/config")
 def config():
     out = dict(PUBLIC_CONFIG)
@@ -241,7 +326,12 @@ def list_categories():
     conn = get_conn(); cur = conn.cursor()
     cur.execute("SELECT name, sort_order, image_url FROM categories ORDER BY sort_order, name")
     rows = cur.fetchall(); cur.close(); conn.close()
-    return [dict(r) for r in rows]
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["image_url"] = f"/api/category-images/{d['name']}" if d.get("image_url") else ""
+        out.append(d)
+    return out
 
 
 @app.get("/api/products")
@@ -252,7 +342,11 @@ def list_products():
     rows = cur.fetchall(); cur.close(); conn.close()
     out = []
     for r in rows:
-        d = dict(r); d.pop("cost_price", None); d.pop("archived", None); d.pop("bundle_skus", None); out.append(d)
+        d = dict(r); d.pop("cost_price", None); d.pop("archived", None); d.pop("bundle_skus", None)
+        raw = d.pop("image_url", "") or ""
+        photo_count = len([p for p in raw.split(" ||| ") if p])
+        d["images"] = [f"/api/images/{d['sku']}/{i}" for i in range(photo_count)]
+        out.append(d)
     return out
 
 
@@ -367,6 +461,7 @@ def upsert_product(p: ProductIn, x_admin_token: Optional[str] = Header(None)):
                          VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""),
                     (p.sku,p.name,p.category,p.cost_price,p.price,p.sale_price,p.stock,p.image_url,p.description,p.bundle_skus))
     conn.commit(); cur.close(); conn.close()
+    _PRODUCT_PHOTOS_CACHE.pop(p.sku, None)  # so the new photo(s) show up immediately, not after next deploy
     return {"ok": True, "sku": p.sku}
 
 class BulkProduct(BaseModel):
@@ -458,6 +553,7 @@ def upsert_category(c: CategoryIn, x_admin_token: Optional[str] = Header(None)):
     else:
         cur.execute(q("INSERT INTO categories (name,sort_order,image_url) VALUES (%s,%s,%s)"), (c.name, c.sort_order, c.image_url))
     conn.commit(); cur.close(); conn.close()
+    _CATEGORY_PHOTO_CACHE.pop(c.name, None)
     return {"ok": True}
 
 
@@ -467,6 +563,7 @@ def delete_category(name: str, x_admin_token: Optional[str] = Header(None)):
     conn = get_conn(); cur = conn.cursor()
     cur.execute(q("DELETE FROM categories WHERE name=%s"), (name,))
     conn.commit(); cur.close(); conn.close()
+    _CATEGORY_PHOTO_CACHE.pop(name, None)
     return {"ok": True}
 
 
@@ -657,6 +754,12 @@ def reports(x_admin_token: Optional[str] = Header(None)):
 # ------------------------------------------------------- pages
 @app.get("/")
 def home(): return FileResponse("index.html")
+
+@app.get("/hero.jpg")
+def hero_image():
+    # Served as a real cacheable file instead of embedded in the HTML —
+    # previously every page load carried this ~350KB inline, uncached.
+    return FileResponse("hero.jpg", headers={"Cache-Control": "public, max-age=2592000"})  # 30 days
 
 @app.get("/about")
 def page_about(): return FileResponse("page_about.html")
